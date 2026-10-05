@@ -1,0 +1,831 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#12151c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Deal Night</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px)}
+[hidden]{display:none!important}
+img{max-width:100%}
+/* Layout: one-screen card table — opponents across the top, your table in the middle, your hand docked at the bottom. Single deliberate night-table look. */
+:root{
+  color-scheme:dark;
+  --bg:#12151c; --surface:#1b1f29; --raised:#262b37; --line:#333a4a;
+  --fg:#f2eee5; --muted:#98a0b0; --gold:#f0b43c; --gold-ink:#2b1d00;
+  --bad:#ff7a69; --good:#62d6a0;
+  --paper:#f8f3e8; --paper-2:#efe7d6; --ink:#1d1b18; --ink-soft:#5b544a;
+  --display:"Alfa Slab One", Rockwell, "Roboto Slab", Georgia, serif;
+  --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.4;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#app{height:100%;max-width:560px;margin:0 auto}
+.muted{color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--raised);border-radius:12px;padding:12px 16px;font-weight:600;min-height:46px}
+.btn.gold{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
+.btn.ghost{background:transparent}
+.btn.bad{background:transparent;border-color:var(--bad);color:var(--bad)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.wide{width:100%}
+input{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-height:46px;width:100%}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0}
+
+/* Home + lobby */
+.home,.lobby,.center{display:flex;flex-direction:column;gap:14px;padding-block:28px;padding-inline:16px}
+.logo{font-family:var(--display);font-weight:400;font-size:64px;line-height:.9;margin:0;color:var(--gold);letter-spacing:.01em}
+.tag{margin:6px 0 10px;color:var(--muted)}
+.home label{font-size:13px;color:var(--muted);margin-bottom:-8px}
+.row{display:flex;gap:8px}
+.row input{flex:1;min-width:0;text-transform:uppercase;letter-spacing:.2em;font-weight:700}
+.or{text-align:center;color:var(--muted);font-size:13px;margin-top:6px}
+.warn{color:var(--bad);font-size:14px;margin:0}
+.code{font-family:var(--display);font-size:72px;letter-spacing:.12em;color:var(--gold);line-height:1}
+.seats{list-style:none;margin:6px 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.seats li{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-weight:600}
+.seats li.empty{background:transparent;border-style:dashed;color:var(--muted);font-weight:400}
+.seats em{font-style:normal;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.seat{font-family:var(--display);color:var(--muted);width:18px}
+
+/* Game frame */
+.game{height:100%;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:10px;padding-block:10px;padding-inline:16px;border-bottom:1px solid var(--line)}
+.top .meta{display:flex;flex-direction:column;font-size:12px;color:var(--muted);line-height:1.2}
+.top .meta b{font-family:var(--display);font-weight:400;color:var(--fg);font-size:15px;letter-spacing:.1em}
+.turn{flex:1;text-align:center;font-weight:700;font-size:14px;padding:7px 10px;border-radius:999px;background:var(--surface)}
+.turn.me{background:var(--gold);color:var(--gold-ink)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--bad);flex:none}
+.dot.on{background:var(--good)}
+.icon{border:1px solid var(--line);background:var(--surface);border-radius:10px;width:40px;height:36px;font-weight:700}
+.scroll{flex:1;overflow-y:auto;padding-block:12px;padding-inline:16px;display:flex;flex-direction:column;gap:14px}
+
+.opps{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.opp{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.opp.turn-on{border-color:var(--gold)}
+.opp.open{background:var(--raised)}
+.opp .on{font-weight:700;display:flex;justify-content:space-between;gap:6px}
+.opp .on span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.opp .on i{font-style:normal;font-size:11px;color:var(--gold);letter-spacing:.08em;text-transform:uppercase}
+.opp .os{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pips{display:flex;flex-wrap:wrap;gap:4px}
+.pip{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.pip::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--c)}
+.pip.full{color:var(--fg);font-weight:700}
+.pip.full::before{box-shadow:0 0 0 2px var(--fg)}
+.sets3{font-size:12px;font-weight:700}
+.sets3 b{color:var(--gold)}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.sec-h h2{margin:0;font-size:15px}
+.sec-h span{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sec-h span b{color:var(--fg)}
+.groups{display:flex;flex-wrap:wrap;gap:8px}
+.grp{border-radius:10px;background:var(--bg);border:1px solid var(--line);padding:6px;display:flex;flex-direction:column;gap:5px;min-width:96px}
+.grp.full{border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c)}
+.grp-h{display:flex;justify-content:space-between;gap:8px;font-size:11px;font-weight:700}
+.grp-h::before{content:"";width:12px;height:12px;border-radius:3px;background:var(--c);flex:none}
+.grp-h span:first-of-type{flex:1}
+.grp-r{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.grp-cards{display:flex;flex-wrap:wrap;gap:4px}
+.mini{border:0;border-radius:6px;background:var(--paper);color:var(--ink);font-size:11px;font-weight:600;padding:3px 6px;display:inline-flex;align-items:center;gap:4px;position:relative;overflow:hidden}
+.mini::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--c)}
+.mini{padding-left:9px}
+.mini.wildchip{cursor:pointer}
+.mini.tap{outline:2px dashed var(--gold);outline-offset:1px}
+.mini.bld{background:var(--gold);color:var(--gold-ink)}
+.mini.bld::before{display:none}
+.bankrow{display:flex;flex-wrap:wrap;gap:4px}
+.coin{font-family:var(--display);font-size:12px;background:var(--raised);border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--gold)}
+.empty-note{font-size:13px;color:var(--muted);margin:0}
+
+.log{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:3px;margin:0;padding:0;list-style:none}
+.log li:last-child{color:var(--fg)}
+
+/* Dock */
+.dock{border-top:1px solid var(--line);background:var(--surface);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px}
+.dock-row{display:flex;align-items:center;gap:10px;padding-inline:16px}
+.dock-row .status{flex:1;font-size:13px;color:var(--muted);min-width:0}
+.dock-row .status b{color:var(--fg)}
+.plays{display:flex;gap:4px}
+.plays i{width:10px;height:10px;border-radius:50%;border:2px solid var(--gold)}
+.plays i.used{background:transparent;border-color:var(--line)}
+.plays i:not(.used){background:var(--gold)}
+.hand{display:flex;gap:8px;overflow-x:auto;padding-inline:16px;padding-block:4px 2px;scroll-snap-type:x proximity}
+
+/* Cards */
+.card{flex:none;width:94px;height:132px;border-radius:10px;border:1px solid var(--paper-2);background:var(--paper);color:var(--ink);display:flex;flex-direction:column;align-items:stretch;text-align:left;padding:0;overflow:hidden;position:relative;scroll-snap-align:start;box-shadow:0 2px 0 rgba(0,0,0,.35)}
+.card .band{height:30px;flex:none}
+.card .cv{position:absolute;top:5px;right:5px;font-family:var(--display);font-size:11px;background:var(--paper);color:var(--ink);border-radius:999px;padding:1px 6px;border:1px solid var(--paper-2)}
+.card .ct{font-weight:700;font-size:13px;line-height:1.15;padding:7px 7px 2px}
+.card .cs{font-size:10.5px;color:var(--ink-soft);padding:0 7px;line-height:1.25}
+.card.money{background:var(--paper);align-items:center;justify-content:center;gap:4px}
+.card.money .mv{font-family:var(--display);font-size:30px;color:var(--ink)}
+.card.money .ml{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+.card.money::after{content:"";position:absolute;inset:6px;border:1.5px solid var(--paper-2);border-radius:6px;pointer-events:none}
+.card.action .band{background:var(--ink)}
+.card.action .ct{padding-top:7px}
+.card.sel{outline:3px solid var(--gold);outline-offset:-3px;transform:translateY(-4px)}
+.ladder{display:flex;gap:3px;padding:4px 7px 0;font-size:10px;font-variant-numeric:tabular-nums;color:var(--ink-soft)}
+.ladder span{border:1px solid var(--paper-2);border-radius:4px;padding:0 3px}
+
+/* Sheet */
+.scrim{position:fixed;inset:0;background:rgba(5,7,11,.6);display:flex;align-items:flex-end;justify-content:center;z-index:10}
+.sheet{width:100%;max-width:560px;max-height:86%;overflow-y:auto;background:var(--surface);border-top:1px solid var(--line);border-radius:18px 18px 0 0;padding-block:16px calc(18px + env(safe-area-inset-bottom,0px));padding-inline:16px;display:flex;flex-direction:column;gap:14px}
+.sheet h3{margin:0;font-size:18px;text-wrap:balance}
+.sheet p{margin:0}
+.sheet .lead{display:flex;gap:14px;align-items:flex-start}
+.sheet .lead .card{transform:none}
+.sheet .lead div{min-width:0}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.btns .btn{flex:1 1 140px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:8px 12px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--gold-ink)}
+.chip:disabled{opacity:.35;cursor:default}
+.chip .sw{width:12px;height:12px;border-radius:3px;background:var(--c)}
+.step-l{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.total{font-variant-numeric:tabular-nums;font-weight:700}
+.total.ok{color:var(--good)}
+.big-win{font-family:var(--display);font-size:44px;line-height:1;color:var(--gold);margin:0}
+.waiting{font-size:13px;color:var(--muted)}
+
+#toast{position:fixed;left:50%;bottom:calc(200px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 14px;border-radius:12px;font-size:14px;font-weight:600;z-index:30;max-width:calc(100% - 32px);text-align:center}
+@media (prefers-reduced-motion:no-preference){.card{transition:transform .15s}}
+</style>
+</head>
+<body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.10.1/mqtt.min.js"></script>
+<div id="app"></div>
+<div id="toast" hidden></div>
+
+<script>
+/* ---------- Cards ---------- */
+const COL={
+  brown:{n:'Brown',size:2,rent:[1,2],hex:'#8b5a3c',val:1},
+  lightblue:{n:'Light Blue',size:3,rent:[1,2,3],hex:'#8fd0ee',val:1},
+  pink:{n:'Pink',size:3,rent:[1,2,4],hex:'#d8579b',val:2},
+  orange:{n:'Orange',size:3,rent:[1,3,5],hex:'#ee8a2c',val:2},
+  red:{n:'Red',size:3,rent:[2,3,6],hex:'#d83b33',val:3},
+  yellow:{n:'Yellow',size:3,rent:[2,4,6],hex:'#f1cb2f',val:3},
+  green:{n:'Green',size:3,rent:[2,4,7],hex:'#2f9a54',val:4},
+  darkblue:{n:'Dark Blue',size:2,rent:[3,8],hex:'#2c4cab',val:4},
+  railroad:{n:'Railroad',size:4,rent:[1,2,3,4],hex:'#55595f',val:2},
+  utility:{n:'Utility',size:2,rent:[1,2],hex:'#a9d49a',val:2},
+};
+const ORDER=['brown','lightblue','pink','orange','red','yellow','green','darkblue','railroad','utility'];
+const ACT={
+  dealbreaker:{n:'Deal Breaker',v:5,k:2,d:'Steal a complete set from any player.'},
+  jsn:{n:'Just Say No',v:4,k:3,d:'Cancel an action played against you. Play it when someone targets you.'},
+  sly:{n:'Sly Deal',v:3,k:3,d:"Steal one property that isn't part of a full set."},
+  forced:{n:'Forced Deal',v:3,k:3,d:"Swap one of your properties for one of theirs (neither from a full set)."},
+  debt:{n:'Debt Collector',v:3,k:3,d:'One player pays you $5M.'},
+  birthday:{n:"It's My Birthday",v:2,k:3,d:'Every other player pays you $2M.'},
+  passgo:{n:'Pass Go',v:1,k:10,d:'Draw 2 extra cards.'},
+  house:{n:'House',v:3,k:3,d:'Add to a full set (not Railroad or Utility). +$3M rent.'},
+  hotel:{n:'Hotel',v:4,k:2,d:'Add to a full set that has a house. +$4M rent.'},
+  double:{n:'Double the Rent',v:1,k:2,d:'Play with a rent card to double it. Uses one of your plays.'},
+};
+function buildDeck(){
+  const d=[];const add=(n,o)=>{for(let i=0;i<n;i++)d.push(Object.assign({},o,{id:d.length}));};
+  [[1,6],[2,5],[3,3],[4,3],[5,2],[10,1]].forEach(([v,n])=>add(n,{t:'money',v}));
+  ORDER.forEach(c=>add(COL[c].size,{t:'prop',v:COL[c].val,colors:[c]}));
+  add(1,{t:'wild',v:4,colors:['darkblue','green']});
+  add(1,{t:'wild',v:4,colors:['green','railroad']});
+  add(1,{t:'wild',v:2,colors:['utility','railroad']});
+  add(1,{t:'wild',v:4,colors:['lightblue','railroad']});
+  add(1,{t:'wild',v:1,colors:['lightblue','brown']});
+  add(2,{t:'wild',v:2,colors:['pink','orange']});
+  add(2,{t:'wild',v:3,colors:['red','yellow']});
+  add(2,{t:'wild',v:0,colors:ORDER.slice(),multi:true});
+  Object.keys(ACT).forEach(a=>add(ACT[a].k,{t:'action',a,v:ACT[a].v}));
+  [['darkblue','green'],['red','yellow'],['pink','orange'],['lightblue','brown'],['railroad','utility']].forEach(p=>add(2,{t:'rent',v:1,colors:p}));
+  add(3,{t:'rent',v:3,colors:ORDER.slice(),wild:true});
+  return d;
+}
+const D=buildDeck();
+
+/* ---------- Rules (pure functions on a state copy) ---------- */
+const others=(st,p)=>st.players.map(x=>x.id).filter(id=>id!==p);
+const cur=st=>st.players[st.turn].id;
+const nm=(st,id)=>{const p=(st.players||[]).find(x=>x.id===id);return p?p.name:'Someone'};
+const props=(st,p)=>(st.props&&st.props[p])||[];
+const countCol=(st,p,c)=>props(st,p).filter(e=>e.col===c).length;
+const complete=(st,p,c)=>countCol(st,p,c)>=COL[c].size;
+const completeCols=(st,p)=>ORDER.filter(c=>complete(st,p,c));
+const builds=(st,p,c)=>((st.builds&&st.builds[p])||{})[c]||[];
+function rentFor(st,p,c){
+  const n=Math.min(countCol(st,p,c),COL[c].size); if(!n) return 0;
+  let r=COL[c].rent[n-1];
+  if(complete(st,p,c)) builds(st,p,c).forEach(id=>{r+=D[id].a==='house'?3:4});
+  return r;
+}
+const bankTotal=(st,p)=>((st.bank&&st.bank[p])||[]).reduce((s,id)=>s+D[id].v,0);
+function assetIds(st,p){
+  const b=Object.values((st.builds&&st.builds[p])||{}).flat();
+  return [...(st.bank[p]||[]),...props(st,p).map(e=>e.c),...b];
+}
+function log(st,s){st.log=(st.log||[]);st.log.push(s);if(st.log.length>40)st.log=st.log.slice(-40)}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function draw(st,p,n){
+  for(let i=0;i<n;i++){
+    if(!st.deck.length){st.deck=shuffle(st.discard);st.discard=[];}
+    if(!st.deck.length) break;
+    st.hands[p].push(st.deck.pop());
+  }
+}
+function takeFromHand(st,p,id){const h=st.hands[p];const i=h.indexOf(id);if(i<0)return false;h.splice(i,1);return true}
+function cardName(id){const c=D[id];
+  if(c.t==='money') return `$${c.v}M`;
+  if(c.t==='prop') return COL[c.colors[0]].n;
+  if(c.t==='wild') return c.multi?'Wild (any color)':`Wild ${c.colors.map(x=>COL[x].n).join('/')}`;
+  if(c.t==='rent') return c.wild?'Wild Rent':`Rent ${c.colors.map(x=>COL[x].n).join('/')}`;
+  return ACT[c.a].n;
+}
+function finish(st){
+  st.players.forEach(({id})=>{
+    const b=st.builds[id]||{};
+    Object.keys(b).forEach(c=>{ if(!complete(st,id,c)){ st.bank[id].push(...b[c]); delete b[c]; } });
+  });
+  if(st.status==='playing'){
+    const w=st.players.find(p=>completeCols(st,p.id).length>=3);
+    if(w){st.status='over';st.winner=w.id;st.pending=null;log(st,`${w.name} completed 3 sets and wins!`);}
+  }
+  return null;
+}
+function startGame(st){
+  if(st.hostId!==ME) return 'Only the host can start the game.';
+  if(st.players.length<2) return 'You need at least 2 players.';
+  st.deck=shuffle([...Array(D.length).keys()]); st.discard=[];
+  st.hands={};st.bank={};st.props={};st.builds={};
+  st.players.forEach(p=>{st.hands[p.id]=[];st.bank[p.id]=[];st.props[p.id]=[];st.builds[p.id]={};});
+  for(let r=0;r<5;r++) st.players.forEach(p=>st.hands[p.id].push(st.deck.pop()));
+  st.turn=Math.floor(Math.random()*st.players.length);
+  st.plays=0;st.drawn=false;st.pending=null;st.winner=null;st.status='playing';st.log=[];
+  log(st,`New game with ${st.players.length} players. ${nm(st,cur(st))} goes first.`);
+  return null;
+}
+function myTurnCheck(st){
+  if(st.status!=='playing') return 'The game is over.';
+  if(cur(st)!==ME) return "It's not your turn.";
+  if(st.pending) return 'Waiting on another player first.';
+  if(!st.drawn) return 'Draw your cards first.';
+  return null;
+}
+function doDraw(st){
+  if(st.status!=='playing') return 'The game is over.';
+  if(cur(st)!==ME) return "It's not your turn.";
+  if(st.drawn) return 'You already drew this turn.';
+  const n=st.hands[ME].length?2:5; draw(st,ME,n); st.drawn=true;
+  return null;
+}
+function play(st,o){
+  const e=myTurnCheck(st); if(e) return e;
+  if(!st.hands[ME].includes(o.cid)) return 'That card is no longer in your hand.';
+  if(st.plays>=3) return 'No plays left. End your turn.';
+  const c=D[o.cid], me=nm(st,ME), opp=others(st,ME);
+  if(o.mode==='bank'){
+    if(c.t==='prop'||c.t==='wild') return "Properties can't go in the bank.";
+    takeFromHand(st,ME,c.id); st.bank[ME].push(c.id); st.plays++;
+    log(st,`${me} banked ${c.t==='money'?'':cardName(c.id)+' as '}$${c.v}M.`); return finish(st);
+  }
+  if(o.mode==='prop'){
+    if(!(c.t==='prop'||c.t==='wild')) return 'That card isn’t a property.';
+    if(!c.colors.includes(o.col)) return 'Pick a color for this card.';
+    takeFromHand(st,ME,c.id); st.props[ME].push({c:c.id,col:o.col}); st.plays++;
+    log(st,`${me} laid down ${COL[o.col].n}${c.t==='wild'?' (wild)':''}.`); return finish(st);
+  }
+  const tgtOk=id=>opp.includes(id);
+  const spend=()=>{takeFromHand(st,ME,c.id);st.discard.push(c.id);st.plays++;};
+  const mk=(kind,extra,targets)=>{st.pending=Object.assign({kind,actor:ME,card:c.id,targets:targets.map(id=>({id,ph:'t',done:false}))},extra);};
+  if(c.t==='rent'){
+    if(!c.colors.includes(o.col)) return 'Pick a color to charge.';
+    const base=rentFor(st,ME,o.col); if(!base) return `You don't have any ${COL[o.col].n} properties.`;
+    const dbl=[...new Set(o.doubles||[])].filter(id=>st.hands[ME].includes(id)&&D[id].a==='double');
+    if(st.plays+1+dbl.length>3) return 'Not enough plays left for that many doubles.';
+    let targets=opp;
+    if(c.wild){ if(!tgtOk(o.target)) return 'Pick who pays.'; targets=[o.target]; }
+    spend(); dbl.forEach(id=>{takeFromHand(st,ME,id);st.discard.push(id);st.plays++;});
+    const amt=base*Math.pow(2,dbl.length);
+    mk('pay',{why:'rent',amount:amt,col:o.col},targets);
+    log(st,`${me} charged ${c.wild?nm(st,o.target):'everyone'} $${amt}M rent on ${COL[o.col].n}${dbl.length?` (doubled${dbl.length>1?' twice':''})`:''}.`);
+    return finish(st);
+  }
+  switch(c.a){
+    case 'passgo': spend(); draw(st,ME,2); log(st,`${me} played Pass Go.`); break;
+    case 'debt': if(!tgtOk(o.target)) return 'Pick a player.'; spend(); mk('pay',{why:'debt',amount:5},[o.target]); log(st,`${me} sent the Debt Collector after ${nm(st,o.target)}.`); break;
+    case 'birthday': spend(); mk('pay',{why:'birthday',amount:2},opp); log(st,`It's ${me}'s birthday. Everyone owes $2M.`); break;
+    case 'sly': {
+      if(!tgtOk(o.target)) return 'Pick a player.';
+      const t=props(st,o.target).find(x=>x.c===o.take);
+      if(!t||complete(st,o.target,t.col)) return "Pick a property that isn't in a full set.";
+      spend(); mk('sly',{take:o.take,takeCol:t.col},[o.target]); log(st,`${me} played Sly Deal on ${nm(st,o.target)}.`); break; }
+    case 'forced': {
+      if(!tgtOk(o.target)) return 'Pick a player.';
+      const t=props(st,o.target).find(x=>x.c===o.take), g=props(st,ME).find(x=>x.c===o.give);
+      if(!t||complete(st,o.target,t.col)) return "Pick their property (not from a full set).";
+      if(!g||complete(st,ME,g.col)) return "Pick one of yours to give (not from a full set).";
+      spend(); mk('forced',{take:o.take,takeCol:t.col,give:o.give,giveCol:g.col},[o.target]); log(st,`${me} played Forced Deal on ${nm(st,o.target)}.`); break; }
+    case 'dealbreaker':
+      if(!tgtOk(o.target)) return 'Pick a player.';
+      if(!o.col||!complete(st,o.target,o.col)) return 'Pick one of their full sets.';
+      spend(); mk('dealbreaker',{col:o.col},[o.target]); log(st,`${me} played Deal Breaker on ${nm(st,o.target)}'s ${COL[o.col].n} set.`); break;
+    case 'house': case 'hotel': {
+      const col=o.col;
+      if(!col||!complete(st,ME,col)) return 'Pick one of your full sets.';
+      if(col==='railroad'||col==='utility') return "Railroads and Utilities can't hold buildings.";
+      const b=builds(st,ME,col), hasH=b.some(id=>D[id].a==='house'), hasT=b.some(id=>D[id].a==='hotel');
+      if(c.a==='house'&&hasH) return 'That set already has a house.';
+      if(c.a==='hotel'&&(!hasH||hasT)) return 'A hotel needs a house first, and only one per set.';
+      takeFromHand(st,ME,c.id); st.plays++;
+      st.builds[ME][col]=[...b,c.id];
+      log(st,`${me} built a ${c.a} on ${COL[col].n}.`); break; }
+    default: return 'Bank this card or hold it for later.';
+  }
+  return finish(st);
+}
+function moveAsset(st,from,to,id){
+  let i=st.bank[from].indexOf(id);
+  if(i>=0){st.bank[from].splice(i,1);st.bank[to].push(id);return}
+  i=st.props[from].findIndex(x=>x.c===id);
+  if(i>=0){const [e]=st.props[from].splice(i,1);st.props[to].push(e);return}
+  const bf=st.builds[from]||{};
+  for(const c of Object.keys(bf)){const j=bf[c].indexOf(id); if(j>=0){bf[c].splice(j,1); if(!bf[c].length) delete bf[c]; st.bank[to].push(id); return}}
+}
+function resolve(st,P,t,pay){
+  const A=P.actor,T=t.id;
+  if(P.kind==='pay'){
+    const all=assetIds(st,T);
+    pay=[...new Set(pay||[])].filter(id=>all.includes(id));
+    const tot=pay.reduce((s,id)=>s+D[id].v,0);
+    if(tot<P.amount&&pay.length<all.length) return `Pick at least $${P.amount}M, or everything you have.`;
+    pay.forEach(id=>moveAsset(st,T,A,id));
+    log(st,all.length?`${nm(st,T)} paid ${nm(st,A)} $${tot}M.`:`${nm(st,T)} had nothing to pay.`); return null;
+  }
+  if(P.kind==='sly'){
+    const i=st.props[T].findIndex(x=>x.c===P.take);
+    if(i<0||complete(st,T,st.props[T][i].col)){log(st,'The Sly Deal missed. That card moved.');return null}
+    const [e]=st.props[T].splice(i,1); st.props[A].push(e); log(st,`${nm(st,A)} took ${nm(st,T)}'s ${COL[e.col].n}.`); return null;
+  }
+  if(P.kind==='forced'){
+    const i=st.props[T].findIndex(x=>x.c===P.take), j=st.props[A].findIndex(x=>x.c===P.give);
+    if(i<0||j<0||complete(st,T,st.props[T][i].col)||complete(st,A,st.props[A][j].col)){log(st,'The Forced Deal missed. A card moved.');return null}
+    const [te]=st.props[T].splice(i,1); const j2=st.props[A].findIndex(x=>x.c===P.give); const [ge]=st.props[A].splice(j2,1);
+    st.props[A].push(te); st.props[T].push(ge); log(st,`${nm(st,A)} swapped ${COL[ge.col].n} for ${nm(st,T)}'s ${COL[te.col].n}.`); return null;
+  }
+  if(P.kind==='dealbreaker'){
+    if(!complete(st,T,P.col)){log(st,'The Deal Breaker missed. That set broke up.');return null}
+    const moving=st.props[T].filter(x=>x.col===P.col);
+    st.props[T]=st.props[T].filter(x=>x.col!==P.col); st.props[A].push(...moving);
+    const b=builds(st,T,P.col); if(b.length){st.builds[A][P.col]=[...builds(st,A,P.col),...b]; delete st.builds[T][P.col];}
+    log(st,`${nm(st,A)} took ${nm(st,T)}'s whole ${COL[P.col].n} set.`); return null;
+  }
+  return null;
+}
+function respond(st,o){
+  const P=st.pending; if(!P) return 'That action is already settled.';
+  const t=P.targets.find(x=>x.id===o.tid); if(!t||t.done) return 'Already handled.';
+  const first=P.targets.find(x=>!x.done); if(first&&first.id!==t.id) return `Wait for ${nm(st,first.id)} first.`;
+  const jsnFrom=p=>{const j=st.hands[p].find(id=>D[id].a==='jsn'); if(j==null) return false; takeFromHand(st,p,j); st.discard.push(j); return true;};
+  if(t.ph==='t'){
+    if(ME!==t.id) return 'Not your call.';
+    if(o.r==='jsn'){ if(!jsnFrom(ME)) return "You don't have a Just Say No."; t.ph='a'; log(st,`${nm(st,ME)} said Just Say No to ${nm(st,P.actor)}.`); }
+    else { const err=resolve(st,P,t,o.pay); if(err) return err; t.done=true; }
+  } else {
+    if(ME!==P.actor) return 'Not your call.';
+    if(o.r==='jsn'){ if(!jsnFrom(ME)) return "You don't have a Just Say No."; t.ph='t'; log(st,`${nm(st,ME)} said Just Say No right back.`); }
+    else { t.done=true; log(st,`${nm(st,t.id)} blocked ${nm(st,ME)}'s ${cardName(P.card)}.`); }
+  }
+  if(st.pending&&st.pending.targets.every(x=>x.done)) st.pending=null;
+  return finish(st);
+}
+function rewild(st,o){
+  if(st.status!=='playing'||cur(st)!==ME) return 'You can move wild cards on your own turn.';
+  if(st.pending) return 'Finish the current action first.';
+  const e=props(st,ME).find(x=>x.c===o.cid); if(!e) return 'That card moved.';
+  if(!D[e.c].colors.includes(o.col)) return 'That color isn’t on this card.';
+  e.col=o.col; return finish(st);
+}
+function endTurn(st,o){
+  if(st.status!=='playing') return 'The game is over.';
+  if(cur(st)!==ME) return "It's not your turn.";
+  if(st.pending) return 'Waiting on another player first.';
+  if(!st.drawn) return 'Draw your cards first.';
+  const h=st.hands[ME], extra=h.length-7;
+  if(extra>0){
+    const d=[...new Set(o.discard||[])].filter(id=>h.includes(id));
+    if(d.length!==extra) return `Pick ${extra} card${extra>1?'s':''} to discard.`;
+    d.forEach(id=>{takeFromHand(st,ME,id);st.discard.push(id)});
+    log(st,`${nm(st,ME)} discarded ${extra}.`);
+  }
+  st.turn=(st.turn+1)%st.players.length; st.plays=0; st.drawn=false;
+  log(st,`${nm(st,cur(st))}'s turn.`);
+  return null;
+}
+
+function joinGame(st,o){
+  const name=String(o.name||'Player').slice(0,16);
+  const p=st.players.find(x=>x.id===ME); if(p){p.name=name;return null;}
+  if(st.status!=='lobby') return 'That game already started. Join the next one.';
+  if(st.players.length>=5) return 'This room is full (5 players max).';
+  st.players.push({id:ME,name}); return null;
+}
+function leaveRoom(st){
+  if(st.status!=='lobby') return null;
+  st.players=st.players.filter(p=>p.id!==ME);
+  if(st.hostId===ME&&st.players.length) st.hostId=st.players[0].id;
+  return null;
+}
+function skipTurn(st){
+  if(st.status!=='playing') return 'The game is over.';
+  if(cur(st)===ME) return 'End your turn instead.';
+  st.pending=null; log(st,`${nm(st,ME)} skipped ${nm(st,cur(st))}'s turn.`);
+  st.turn=(st.turn+1)%st.players.length; st.plays=0; st.drawn=false; return null;
+}
+function reduce(st,a){
+  const o=a.o||{};
+  switch(a.t){
+    case 'join': return joinGame(st,o);
+    case 'leave': return leaveRoom(st);
+    case 'start': return startGame(st);
+    case 'tolobby': if(st.hostId!==ME) return 'Only the host can do that.'; st.status='lobby'; st.pending=null; return null;
+    case 'skip': return skipTurn(st);
+    case 'draw': return doDraw(st);
+    case 'end': return endTurn(st,o);
+    case 'play': return play(st,o);
+    case 'respond': return respond(st,o);
+    case 'rewild': return rewild(st,o);
+  }
+  return 'Unknown move.';
+}
+
+/* ---------- Platform (MQTT relay, no host: whoever moves publishes) ---------- */
+const BROKERS=['wss://broker.emqx.io:8084/mqtt','wss://broker.hivemq.com:8884/mqtt','wss://test.mosquitto.org:8081'];
+const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}};
+let ME=LS.get('dn-me'); if(!ME){ME='p'+Math.random().toString(36).slice(2,10);LS.set('dn-me',ME);}
+let client=null,brokerIx=0,connected=false,subs=[],S=null,ROOM=null,busy=false,wantJoin=null,joinT=null;
+let ui={sheet:null,sel:[],open:null,respKey:null,lost:false};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clone=x=>JSON.parse(JSON.stringify(x));
+const T=(code,x)=>`dealnight/v2/${code}/${x}`;
+const seated=()=>!!(S&&S.players.some(p=>p.id===ME));
+let toastT=null;
+function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{t.hidden=true},3200)}
+
+function connect(){
+  if(client){try{client.end(true)}catch(e){} client=null;}
+  const url=BROKERS[brokerIx%BROKERS.length];
+  client=mqtt.connect(url,{clientId:'dn_'+Math.random().toString(16).slice(2,10),keepalive:30,reconnectPeriod:3000,connectTimeout:8000,clean:true});
+  client.on('connect',()=>{connected=true;subs.forEach(t=>client.subscribe(t,{qos:1}));render();});
+  client.on('message',(t,m)=>{try{onMessage(t,JSON.parse(m.toString()))}catch(e){console.warn(e)}});
+  client.on('error',e=>console.warn('mqtt',e));
+  client.on('close',()=>{connected=false;render();});
+  client.on('offline',()=>{connected=false;render();});
+  setTimeout(()=>{if(!connected){brokerIx++;connect();}},9000);
+}
+function sub(t){if(!subs.includes(t))subs.push(t);if(connected)client.subscribe(t,{qos:1});}
+function unsubAll(){if(connected&&client)subs.forEach(t=>client.unsubscribe(t));subs=[];}
+function pub(t,obj,retain){if(!client)return;client.publish(t,JSON.stringify(obj),{qos:1,retain:!!retain});}
+function publishState(){if(!S||!ROOM)return;pub(T(ROOM,'state'),S,true);render();}
+
+function onMessage(t,m){
+  if(!ROOM||!m||t!==T(ROOM,'state')||m.code!==ROOM) return;
+  if(!S||(m.seq||0)>(S.seq||0)){S=m;onState();}
+  else if((m.seq||0)<(S.seq||0)) publishState();
+}
+function onState(){
+  ui.lost=false;
+  if(wantJoin){
+    if(seated()) wantJoin=null;
+    else { clearTimeout(joinT); joinT=setTimeout(()=>{ if(wantJoin&&S&&!seated()){ const n=wantJoin; if(send('join',{name:n})) wantJoin=null; } },150+Math.random()*600); }
+  }
+  render();
+}
+function send(t,o){
+  if(!S) return false;
+  const probe=clone(S); const err=reduce(probe,{t,o}); if(err){toast(err);return false;}
+  probe.seq=(S.seq||0)+1; probe.by=ME; probe.at=Date.now(); S=probe; publishState(); return true;
+}
+setInterval(()=>{if(ROOM&&!S&&connected){ui.lost=true;render();}},10000);
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&client&&!connected){ try{client.reconnect()}catch(e){} } });
+
+function enter(code){
+  ROOM=code; S=null; busy=false; ui.sheet=null; ui.open=null; ui.lost=false;
+  LS.set('dn-room',code); sub(T(code,'state')); render();
+}
+function genCode(){const L='ABCDEFGHJKMNPQRSTUVWXYZ';let s='';for(let i=0;i<4;i++)s+=L[Math.floor(Math.random()*L.length)];return s}
+function myName(){const el=$('#nm');const v=(el?el.value:LS.get('dn-name')||'').trim().slice(0,16);if(v)LS.set('dn-name',v);return v}
+function createRoom(){
+  const name=myName(); if(!name) return toast('Add your name first.');
+  const code=genCode(); enter(code);
+  S={code,status:'lobby',hostId:ME,players:[{id:ME,name}],log:[],seq:1,by:ME,at:Date.now()}; publishState();
+}
+function joinRoom(){
+  const name=myName(); if(!name) return toast('Add your name first.');
+  const code=(($('#code')||{}).value||'').toUpperCase().replace(/[^A-Z]/g,'');
+  if(code.length!==4) return toast('Room codes are 4 letters.');
+  wantJoin=name; enter(code);
+}
+function leave(){
+  if(S&&S.status==='lobby'&&seated()) send('leave',{});
+  unsubAll(); ROOM=null; S=null; busy=false; ui.sheet=null; wantJoin=null; LS.set('dn-room',null); render();
+}
+function boot(){
+  render(); connect();
+  const saved=LS.get('dn-room'); if(saved) enter(saved);
+}
+
+/* ---------- Views ---------- */
+function band(c){
+  if(c.t==='prop') return `background:${COL[c.colors[0]].hex}`;
+  if(c.multi||c.wild) return `background:linear-gradient(90deg,${ORDER.map((k,i)=>`${COL[k].hex} ${i*10}% ${(i+1)*10}%`).join(',')})`;
+  const [a,b]=c.colors; return `background:linear-gradient(90deg,${COL[a].hex} 50%,${COL[b].hex} 50%)`;
+}
+function cardHTML(id,opts={}){
+  const c=D[id], sel=opts.sel?' sel':'', act=opts.act||'card';
+  if(c.t==='money') return `<button class="card money${sel}" data-act="${act}" data-id="${id}" aria-label="$${c.v}M money"><span class="mv">$${c.v}M</span><span class="ml">Money</span></button>`;
+  let t='',s='',extra='';
+  if(c.t==='prop'){t=COL[c.colors[0]].n;s=`Full set: ${COL[c.colors[0]].size}`;extra=`<span class="ladder">${COL[c.colors[0]].rent.map(r=>`<span>${r}</span>`).join('')}</span>`;}
+  else if(c.t==='wild'){t='Wild';s=c.multi?'Any color. No cash value.':c.colors.map(x=>COL[x].n).join(' / ');}
+  else if(c.t==='rent'){t=c.wild?'Wild Rent':'Rent';s=c.wild?'One player pays, any color':c.colors.map(x=>COL[x].n).join(' / ')+'. Everyone pays.';}
+  else {t=ACT[c.a].n;s=ACT[c.a].d.split('. ')[0].replace(/\.$/,'');}
+  return `<button class="card ${c.t}${sel}" data-act="${act}" data-id="${id}"><span class="band" style="${c.t==='action'?'':band(c)}"></span><span class="cv">$${c.v}M</span><span class="ct">${t}</span>${extra}<span class="cs">${esc(s)}</span></button>`;
+}
+function groupsHTML(st,p,mine){
+  const myMove=mine&&st.status==='playing'&&cur(st)===ME&&!st.pending;
+  const cols=ORDER.filter(c=>countCol(st,p,c)>0||builds(st,p,c).length);
+  if(!cols.length) return `<p class="empty-note">No properties yet.</p>`;
+  return `<div class="groups">${cols.map(c=>{
+    const n=countCol(st,p,c), full=n>=COL[c].size, r=rentFor(st,p,c);
+    const cards=props(st,p).filter(e=>e.col===c).map(e=>{
+      const w=D[e.c].t==='wild';
+      const lbl=w?(D[e.c].multi?'Wild ★':'Wild'):COL[c].n.split(' ')[0];
+      return myMove&&w?`<button class="mini wildchip tap" style="--c:${COL[c].hex}" data-act="rewild" data-id="${e.c}" aria-label="Move wild card">${lbl}</button>`:`<span class="mini" style="--c:${COL[c].hex}">${lbl}</span>`;
+    }).join('')+builds(st,p,c).map(id=>`<span class="mini bld">${ACT[D[id].a].n}</span>`).join('');
+    return `<div class="grp${full?' full':''}" style="--c:${COL[c].hex}"><div class="grp-h"><span>${COL[c].n}</span><span>${n}/${COL[c].size}</span></div><div class="grp-cards">${cards}</div><div class="grp-r">Rent $${r}M</div></div>`;
+  }).join('')}</div>`;
+}
+function bankHTML(st,p){
+  const b=(st.bank[p]||[]).slice().sort((a,c)=>D[c].v-D[a].v);
+  return b.length?`<div class="bankrow">${b.map(id=>`<span class="coin">$${D[id].v}M</span>`).join('')}</div>`:'';
+}
+function homeView(){
+  return `<div class="home">
+    <div><h1 class="logo">Deal<br>Night</h1><p class="tag">The property card game. 2 to 5 players, one phone each.</p></div>
+    ${!connected?'<p class="muted">Connecting to the relay…</p>':''}
+    <label for="nm">Your name</label>
+    <input id="nm" maxlength="16" autocomplete="nickname" value="${esc(LS.get('dn-name')||'')}" placeholder="Name at the table">
+    <button class="btn gold wide" data-act="create" ${connected?'':'disabled'}>Create a room</button>
+    <div class="or">or join a friend's room</div>
+    <div class="row"><input id="code" maxlength="4" placeholder="CODE" autocapitalize="characters" autocomplete="off"><button class="btn" data-act="join" ${connected?'':'disabled'}>Join</button></div>
+  </div>`;
+}
+function lobbyView(){
+  const host=S.hostId===ME, n=S.players.length, inRoom=S.players.some(p=>p.id===ME);
+  const seats=S.players.map((p,i)=>`<li><span class="seat">${i+1}</span><span>${esc(p.name)}</span>${p.id===S.hostId?'<em>host</em>':''}${p.id===ME?'<em>you</em>':''}</li>`).join('')
+    +Array.from({length:Math.max(0,5-n)},(_, i)=>`<li class="empty"><span class="seat">${n+i+1}</span>Open seat</li>`).join('');
+  return `<div class="lobby">
+    <p class="eyebrow">Room code</p><div class="code">${esc(S.code)}</div>
+    <p class="muted">Everyone opens Deal Night and enters this code. The game deals in whoever is here when the host starts.</p>
+    <ul class="seats">${seats}</ul>
+    ${!inRoom?`<button class="btn gold wide" data-act="joinhere" ${busy?'disabled':''}>Take a seat</button>`:host?`<button class="btn gold wide" data-act="start" ${n<2?'disabled':''}>${n<2?'Waiting for players':`Start with ${n} players`}</button>`:`<p class="muted">Waiting for ${esc(nm(S,S.hostId))} to start.</p>`}
+    <button class="btn ghost wide" data-act="leave">Leave room</button>
+  </div>`;
+}
+function gameView(){
+  const st=S, myTurn=cur(st)===ME, P=st.pending;
+  const turnTxt=st.status==='over'?`${esc(nm(st,st.winner))} won`:myTurn?(st.drawn?'Your turn':'Your turn. Draw'):`${esc(nm(st,cur(st)))}'s turn`;
+  const opps=others(st,ME).map(id=>{
+    const pip=ORDER.filter(c=>countCol(st,id,c)>0).map(c=>`<span class="pip${complete(st,id,c)?' full':''}" style="--c:${COL[c].hex}">${countCol(st,id,c)}/${COL[c].size}</span>`).join('');
+    return `<button class="opp${cur(st)===id?' turn-on':''}${ui.open===id?' open':''}" data-act="opp" data-id="${id}" aria-expanded="${ui.open===id}">
+      <span class="on"><span>${esc(nm(st,id))}</span>${cur(st)===id?'<i>Turn</i>':''}</span>
+      <span class="os">${st.hands[id].length} cards · $${bankTotal(st,id)}M banked</span>
+      <span class="pips">${pip||'<span class="pip">No properties</span>'}</span>
+      <span class="sets3"><b>${completeCols(st,id).length}</b>/3 sets</span>
+    </button>`;}).join('');
+  const openPanel=ui.open&&st.hands[ui.open]?`<section class="panel"><div class="sec-h"><h2>${esc(nm(st,ui.open))}'s table</h2><span>Bank <b>$${bankTotal(st,ui.open)}M</b></span></div>${groupsHTML(st,ui.open,false)}${bankHTML(st,ui.open)}</section>`:'';
+  let status='';
+  if(P){
+    const f=P.targets.find(t=>!t.done); const who=f?(f.ph==='t'?nm(st,f.id):nm(st,P.actor)):'';
+    status=`Waiting on <b>${esc(who)}</b>`;
+  } else if(myTurn&&st.status==='playing'){
+    status=st.drawn?`Tap a card to play it.${st.hands[ME].length>7?` Hand over 7.`:''}`:'Start by drawing.';
+  } else if(st.status==='playing') status=`${esc(nm(st,cur(st)))} is playing.`;
+  const plays=myTurn&&st.drawn&&st.status==='playing'?`<span class="plays" aria-label="${3-st.plays} plays left">${[0,1,2].map(i=>`<i class="${i<st.plays?'used':''}"></i>`).join('')}</span>`:'';
+  let btn='';
+  if(st.status==='playing'&&myTurn&&!P){ btn=st.drawn?`<button class="btn" data-act="end" ${busy?'disabled':''}>End turn</button>`:`<button class="btn gold" data-act="draw" ${busy?'disabled':''}>Draw ${st.hands[ME].length?2:5}</button>`; }
+  return `<div class="game">
+    <header class="top"><span class="dot${connected?' on':''}" title="${connected?'Connected':'Reconnecting'}"></span><span class="meta">Room<b>${esc(st.code)}</b></span><span class="turn${myTurn&&st.status==='playing'?' me':''}">${turnTxt}</span><button class="icon" data-act="menu" aria-label="Menu">•••</button></header>
+    <main class="scroll" id="scroller">
+      <section class="opps">${opps}</section>
+      ${openPanel}
+      <section class="panel"><div class="sec-h"><h2>Your table</h2><span>Bank <b>$${bankTotal(st,ME)}M</b> · <b>${completeCols(st,ME).length}</b>/3 sets · ${st.deck.length} in deck</span></div>${groupsHTML(st,ME,true)}${bankHTML(st,ME)}</section>
+      <ul class="log">${(st.log||[]).slice(-5).map(l=>`<li>${esc(l)}</li>`).join('')}</ul>
+    </main>
+    <footer class="dock">
+      <div class="dock-row"><span class="status">${status}</span>${plays}${btn}</div>
+      <div class="hand" id="hand">${st.hands[ME].map(id=>cardHTML(id)).join('')||'<p class="empty-note">Your hand is empty.</p>'}</div>
+    </footer>
+    ${sheetHTML()}
+  </div>`;
+}
+function chip(act,k,v,label,pressed,opts={}){return `<button class="chip" data-act="${act}" data-k="${k}" data-v="${esc(v)}" aria-pressed="${!!pressed}" ${opts.dis?'disabled':''}>${opts.c?`<span class="sw" style="--c:${opts.c}"></span>`:''}${esc(label)}</button>`}
+function sheetWrap(inner,closable=true){return `<div class="scrim" ${closable?'data-act="scrim"':''}><div class="sheet" role="dialog" aria-modal="true">${inner}</div></div>`}
+function pendText(st,P){
+  const A=nm(st,P.actor);
+  if(P.kind==='pay'){ if(P.why==='rent') return `${A} is charging $${P.amount}M rent on ${COL[P.col].n}.`; if(P.why==='debt') return `${A} sent the Debt Collector. Pay $5M.`; return `It's ${A}'s birthday. Pay $2M.`; }
+  if(P.kind==='sly') return `${A} played Sly Deal to take your ${COL[P.takeCol].n}${D[P.take].t==='wild'?' (wild)':''}.`;
+  if(P.kind==='forced') return `${A} played Forced Deal: their ${COL[P.giveCol].n} for your ${COL[P.takeCol].n}.`;
+  return `${A} played Deal Breaker on your full ${COL[P.col].n} set.`;
+}
+function sheetHTML(){
+  const st=S, P=st.pending, hasJ=p=>st.hands[p].some(id=>D[id].a==='jsn');
+  if(st.status==='over'){
+    const host=st.hostId===ME;
+    return sheetWrap(`<p class="eyebrow">Game over</p><p class="big-win">${esc(nm(st,st.winner))} wins</p>
+      <p class="muted">Sets: ${completeCols(st,st.winner).map(c=>COL[c].n).join(', ')}</p>
+      ${host?`<div class="btns"><button class="btn gold" data-act="again">Deal again</button><button class="btn" data-act="tolobby">Back to lobby</button></div>`:`<p class="muted">Waiting for ${esc(nm(st,st.hostId))} to deal again.</p>`}
+      <button class="btn ghost" data-act="leave">Leave room</button>`,false);
+  }
+  if(P){
+    const first=P.targets.find(t=>!t.done);
+    const mine=first&&first.id===ME&&first.ph==='t'?first:null;
+    if(mine){
+      const key=`${P.actor}|${P.card}`;
+      if(ui.respKey!==key){ui.respKey=key;ui.sel=[];}
+      const jsnBtn=hasJ(ME)?`<button class="btn bad" data-act="jsn" data-tid="${ME}">Just Say No</button>`:'';
+      if(P.kind==='pay'){
+        const all=assetIds(st,ME), tot=ui.sel.reduce((s,id)=>s+D[id].v,0), have=all.reduce((s,id)=>s+D[id].v,0);
+        const ok=tot>=P.amount||(ui.sel.length===all.length);
+        const ch=all.map(id=>{
+          const e=props(st,ME).find(x=>x.c===id); const c=D[id];
+          const label=e?`${COL[e.col].n}${c.t==='wild'?' wild':''} · $${c.v}M`:c.t==='action'&&(c.a==='house'||c.a==='hotel')&&!st.bank[ME].includes(id)?`${ACT[c.a].n} · $${c.v}M`:`$${c.v}M`;
+          return chip('sel','id',id,label,ui.sel.includes(id),{c:e?COL[e.col].hex:null});
+        }).join('');
+        return sheetWrap(`<h3>${esc(pendText(st,P))}</h3>
+          ${all.length?`<p class="muted">Pick what to hand over from your bank and table. No change is given.${have<P.amount?' You don’t have enough, so you pay everything.':''}</p>
+          <div class="chips">${ch}</div>
+          <p class="total${ok?' ok':''}">Selected $${tot}M of $${P.amount}M</p>`:`<p class="muted">You have nothing to pay with.</p>`}
+          <div class="btns">${jsnBtn}<button class="btn gold" data-act="pay" ${ok&&!busy?'':'disabled'}>${all.length?`Pay $${tot}M`:'OK'}</button></div>
+          ${have<P.amount&&all.length?`<button class="btn ghost" data-act="selall">Select everything</button>`:''}`,false);
+      }
+      return sheetWrap(`<h3>${esc(pendText(st,P))}</h3><div class="btns">${jsnBtn}<button class="btn gold" data-act="accept" ${busy?'disabled':''}>Let it happen</button></div>`,false);
+    }
+    const blocked=P.actor===ME&&first&&first.ph==='a'?first:null;
+    if(blocked){
+      return sheetWrap(`<h3>${esc(nm(st,blocked.id))} said Just Say No to your ${esc(cardName(P.card))}.</h3>
+        <div class="btns">${hasJ(ME)?`<button class="btn bad" data-act="jsn" data-tid="${blocked.id}">Just Say No back</button>`:''}<button class="btn gold" data-act="ok" data-tid="${blocked.id}">OK, let it go</button></div>`,false);
+    }
+  }
+  const sh=ui.sheet; if(!sh) return '';
+  if(sh.k==='menu'){
+    return sheetWrap(`<h3>Room ${esc(st.code)}</h3><p class="muted">${st.players.map(p=>esc(p.name)).join(', ')}</p>
+      <p class="muted">Moves sync between phones. If you leave the page, it catches up when you come back.</p>
+      <div class="btns">${cur(st)!==ME&&st.status==='playing'?`<button class="btn" data-act="skip">Skip ${esc(nm(st,cur(st)))}'s turn</button>`:''}${st.hostId===ME?`<button class="btn" data-act="tolobby">End game, back to lobby</button>`:''}<button class="btn bad" data-act="leave">Leave room</button></div>
+      <button class="btn ghost" data-act="close">Close</button>`);
+  }
+  if(sh.k==='discard'){
+    const need=st.hands[ME].length-7;
+    return sheetWrap(`<h3>Discard ${need} card${need>1?'s':''}</h3><p class="muted">You can hold 7 at the end of your turn.</p>
+      <div class="hand" style="padding-inline:0">${st.hands[ME].map(id=>cardHTML(id,{act:'sel',sel:ui.sel.includes(id)})).join('')}</div>
+      <div class="btns"><button class="btn ghost" data-act="close">Back</button><button class="btn gold" data-act="discard" ${ui.sel.length===need&&!busy?'':'disabled'}>Discard and end turn</button></div>`);
+  }
+  if(sh.k==='rewild'){
+    const c=D[sh.cid], e=props(st,ME).find(x=>x.c===sh.cid); if(!e){ui.sheet=null;return ''}
+    return sheetWrap(`<h3>Move this wild card</h3><p class="muted">Free on your turn. It doesn't use a play.</p>
+      <div class="chips">${c.colors.map(col=>chip('setwild','col',col,COL[col].n,e.col===col,{c:COL[col].hex})).join('')}</div>
+      <button class="btn ghost" data-act="close">Close</button>`);
+  }
+  if(sh.k==='card'){
+    if(!st.hands[ME].includes(sh.cid)){ui.sheet=null;return ''}
+    const c=D[sh.cid], why=myTurnCheck(st)||(st.plays>=3?'No plays left. End your turn.':null);
+    const desc=c.t==='money'?'Money. Bank it to pay debts.':c.t==='prop'?`Property. A full set takes ${COL[c.colors[0]].size}. Rent ${COL[c.colors[0]].rent.map(r=>'$'+r+'M').join(' / ')}.`:c.t==='wild'?(c.multi?'Wild property for any color. Cannot be banked and is worth nothing as payment.':`Wild property: ${c.colors.map(x=>COL[x].n).join(' or ')}. You can move it on your turn.`):c.t==='rent'?(c.wild?'Charge one player rent for any color you own.':`Charge every other player rent for ${c.colors.map(x=>COL[x].n).join(' or ')}.`):ACT[c.a].d;
+    let body='';
+    if(why){ body=`<p class="warn">${esc(why)}</p>`; }
+    else if(c.t==='money'){ body=`<div class="btns"><button class="btn gold" data-act="bank">Bank $${c.v}M</button></div>`; }
+    else if(c.t==='prop'||c.t==='wild'){
+      body=`<p class="step-l">Lay it down as</p><div class="chips">${c.colors.map(col=>`<button class="chip" data-act="playprop" data-col="${col}"><span class="sw" style="--c:${COL[col].hex}"></span>${COL[col].n} (${countCol(st,ME,col)}/${COL[col].size})</button>`).join('')}</div>`;
+    } else {
+      body=actionConfig(st,c,sh)+`<button class="btn ghost" data-act="bank">Bank it instead as $${c.v}M</button>`;
+    }
+    return sheetWrap(`<div class="lead">${cardHTML(sh.cid,{act:'noop'})}<div><h3>${esc(cardName(sh.cid))}</h3><p class="muted">${esc(desc)}</p></div></div>${body}<button class="btn ghost" data-act="close">Close</button>`);
+  }
+  return '';
+}
+function actionConfig(st,c,sh){
+  const opp=others(st,ME), a=c.t==='rent'?'rent':c.a;
+  const tgtRow=()=>`<p class="step-l">Pick a player</p><div class="chips">${opp.map(id=>chip('pick','target',id,nm(st,id),sh.target===id)).join('')}</div>`;
+  let html='', ready=false;
+  if(a==='jsn') return `<p class="muted">Hold it. You'll get the option when someone targets you.</p>`;
+  if(a==='double') return `<p class="muted">Pick a rent card and add doubles there.</p>`;
+  if(a==='passgo'){ready=true;}
+  else if(a==='birthday'){ready=true;}
+  else if(a==='debt'){html=tgtRow();ready=!!sh.target;}
+  else if(a==='sly'||a==='forced'){
+    html=tgtRow();
+    if(sh.target){
+      const theirs=props(st,sh.target).filter(e=>!complete(st,sh.target,e.col));
+      html+=`<p class="step-l">Take</p>`+(theirs.length?`<div class="chips">${theirs.map(e=>chip('pick','take',e.c,`${COL[e.col].n}${D[e.c].t==='wild'?' wild':''}`,sh.take===e.c,{c:COL[e.col].hex})).join('')}</div>`:`<p class="muted">Nothing to take outside a full set.</p>`);
+    }
+    if(a==='forced'){
+      const mine=props(st,ME).filter(e=>!complete(st,ME,e.col));
+      html+=`<p class="step-l">Give</p>`+(mine.length?`<div class="chips">${mine.map(e=>chip('pick','give',e.c,`${COL[e.col].n}${D[e.c].t==='wild'?' wild':''}`,sh.give===e.c,{c:COL[e.col].hex})).join('')}</div>`:`<p class="muted">You need a property outside a full set to give.</p>`);
+      ready=sh.target&&sh.take!=null&&sh.give!=null;
+    } else ready=sh.target&&sh.take!=null;
+  }
+  else if(a==='dealbreaker'){
+    html=tgtRow();
+    if(sh.target){const f=completeCols(st,sh.target); html+=`<p class="step-l">Take the set</p>`+(f.length?`<div class="chips">${f.map(col=>chip('pick','col',col,COL[col].n,sh.col===col,{c:COL[col].hex})).join('')}</div>`:`<p class="muted">They have no full sets.</p>`);}
+    ready=sh.target&&sh.col;
+  }
+  else if(a==='house'||a==='hotel'){
+    const ok=completeCols(st,ME).filter(col=>{if(col==='railroad'||col==='utility')return false;const b=builds(st,ME,col);const h=b.some(id=>D[id].a==='house'),t=b.some(id=>D[id].a==='hotel');return a==='house'?!h:(h&&!t)});
+    html=`<p class="step-l">Build on</p>`+(ok.length?`<div class="chips">${ok.map(col=>chip('pick','col',col,COL[col].n,sh.col===col,{c:COL[col].hex})).join('')}</div>`:`<p class="muted">${a==='house'?'You need a full set (not Railroad or Utility) without a house.':'You need a full set with a house.'}</p>`);
+    ready=!!sh.col;
+  }
+  else if(a==='rent'){
+    html=`<p class="step-l">Charge rent on</p><div class="chips">${c.colors.map(col=>{const r=rentFor(st,ME,col);return chip('pick','col',col,`${COL[col].n} $${r}M`,sh.col===col,{c:COL[col].hex,dis:!r});}).join('')}</div>`;
+    if(c.wild) html+=tgtRow();
+    const dbls=st.hands[ME].filter(id=>D[id].a==='double'), room=Math.min(dbls.length,2-st.plays);
+    if(room>0){ html+=`<p class="step-l">Double the Rent</p><div class="chips">${[0,1,2].slice(0,room+1).map(n=>chip('dbl','n',n,n?`×${Math.pow(2,n)} (uses ${n} more play${n>1?'s':''})`:'No double',(sh.dbl||0)===n)).join('')}</div>`; }
+    const base=sh.col?rentFor(st,ME,sh.col):0;
+    if(base) html+=`<p class="total ok">${c.wild?'They pay':'Each player pays'} $${base*Math.pow(2,sh.dbl||0)}M</p>`;
+    ready=!!sh.col&&(!c.wild||sh.target);
+  }
+  return html+`<div class="btns"><button class="btn gold" data-act="go" ${ready&&!busy?'':'disabled'}>Play ${esc(cardName(c.id))}</button></div>`;
+}
+function render(){
+  const app=$('#app');
+  const hand=$('#hand'), sc=$('#scroller'); const hx=hand?hand.scrollLeft:0, sy=sc?sc.scrollTop:0;
+  if(!ROOM){ const nmv=$('#nm')?$('#nm').value:null, cv=$('#code')?$('#code').value:null; app.innerHTML=homeView(); if(nmv!=null)$('#nm').value=nmv; if(cv!=null)$('#code').value=cv; return; }
+  if(!S){ app.innerHTML=`<div class="center"><h1 class="logo">Deal<br>Night</h1><p class="muted">${ui.lost?`No game found for ${esc(ROOM)}. Check the code, or the host may have left.`:`Finding room ${esc(ROOM)}…`}</p><button class="btn ghost" data-act="leave">${ui.lost?'Back':'Cancel'}</button></div>`; return; }
+  const seated=S.players.some(p=>p.id===ME);
+  if(S.status==='lobby') app.innerHTML=lobbyView();
+  else if(!seated||!S.hands||!S.hands[ME]) app.innerHTML=`<div class="center"><p class="eyebrow">Room ${esc(S.code)}</p><h3>A game is in progress</h3><p class="muted">${S.players.map(p=>esc(p.name)).join(', ')} are playing. You can join the next round from the lobby.</p><button class="btn ghost" data-act="leave">Leave</button></div>`;
+  else app.innerHTML=gameView();
+  const h2=$('#hand'), s2=$('#scroller'); if(h2) h2.scrollLeft=hx; if(s2) s2.scrollTop=sy;
+}
+
+
+/* ---------- Input ---------- */
+function act(t,o){ if(busy) return; if(send(t,o)){ui.sheet=null;ui.sel=[];} render(); }
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]'); if(!b||b.disabled) return;
+  const a=b.dataset.act, d=b.dataset;
+  if(a==='scrim'){ if(e.target===b){ui.sheet=null;render();} return; }
+  switch(a){
+    case 'create': return createRoom();
+    case 'join': return joinRoom();
+    case 'joinhere': return act('join',{name:myName()||LS.get('dn-name')||'Player'});
+    case 'leave': return leave();
+    case 'start': case 'again': return act('start',{});
+    case 'tolobby': return act('tolobby',{});
+    case 'skip': return act('skip',{});
+    case 'draw': return act('draw',{});
+    case 'end':
+      if(S.hands[ME].length>7){ui.sheet={k:'discard'};ui.sel=[];return render();}
+      return act('end',{});
+    case 'discard': return act('end',{discard:ui.sel.slice()});
+    case 'card': ui.sheet={k:'card',cid:+d.id,dbl:0}; return render();
+    case 'menu': ui.sheet={k:'menu'}; return render();
+    case 'close': ui.sheet=null; ui.sel=[]; return render();
+    case 'opp': ui.open=ui.open===d.id?null:d.id; return render();
+    case 'bank': return act('play',{cid:ui.sheet.cid,mode:'bank'});
+    case 'playprop': return act('play',{cid:ui.sheet.cid,mode:'prop',col:d.col});
+    case 'pick': {
+      const s=ui.sheet, v=(d.k==='take'||d.k==='give')?+d.v:d.v;
+      s[d.k]=s[d.k]===v&&d.k!=='target'?null:v;
+      if(d.k==='target'){ s.take=null; if(D[s.cid].t!=='rent') s.col=null; }
+      return render(); }
+    case 'dbl': ui.sheet.dbl=+d.v; return render();
+    case 'go': {
+      const s=ui.sheet, dbl=S.hands[ME].filter(id=>D[id].a==='double').slice(0,s.dbl||0);
+      return act('play',{cid:s.cid,mode:'action',target:s.target,take:s.take,give:s.give,col:s.col,doubles:dbl}); }
+    case 'sel': { const id=d.v!=null?+d.v:+d.id; if(isNaN(id)) return; ui.sel=ui.sel.includes(id)?ui.sel.filter(x=>x!==id):[...ui.sel,id]; return render(); }
+    case 'selall': ui.sel=assetIds(S,ME); return render();
+    case 'pay': { if(busy) return; if(send('respond',{tid:ME,r:'accept',pay:ui.sel.slice()})) ui.sel=[]; return render(); }
+    case 'accept': return act('respond',{tid:ME,r:'accept'});
+    case 'jsn': return act('respond',{tid:d.tid,r:'jsn'});
+    case 'ok': return act('respond',{tid:d.tid,r:'accept'});
+    case 'rewild': ui.sheet={k:'rewild',cid:+d.id}; return render();
+    case 'setwild': return act('rewild',{cid:ui.sheet.cid,col:d.v});
+  }
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.id==='code') joinRoom();
+  if(e.key==='Escape'&&ui.sheet){ui.sheet=null;render();}
+});
+boot();
+</script>
+</body></html>
