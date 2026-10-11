@@ -3,145 +3,153 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#12151c">
+<meta name="theme-color" content="#fff4f6">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Deal Night</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,600..900,50&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
 :root{padding-top:env(safe-area-inset-top,0px)}
 [hidden]{display:none!important}
 img{max-width:100%}
-/* Layout: one-screen card table — opponents across the top, your table in the middle, your hand docked at the bottom. Single deliberate night-table look. */
+/* Layout: one-screen card table — opponents across the top, your table in the middle, your hand docked at the bottom. Philly-edition pastel look (pink felt, cream cards, Fraunces headings). */
 :root{
-  color-scheme:dark;
-  --bg:#12151c; --surface:#1b1f29; --raised:#262b37; --line:#333a4a;
-  --fg:#f2eee5; --muted:#98a0b0; --gold:#f0b43c; --gold-ink:#2b1d00;
-  --bad:#ff7a69; --good:#62d6a0;
-  --paper:#f8f3e8; --paper-2:#efe7d6; --ink:#1d1b18; --ink-soft:#5b544a;
-  --display:"Alfa Slab One", Rockwell, "Roboto Slab", Georgia, serif;
-  --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme:light;
+  --bg:#fff4f6; --surface:#ffffff; --raised:#fff3e6; --line:rgba(180,90,120,.18); --soft:#ffd6e1;
+  --fg:#4a2b3a; --muted:rgba(74,43,58,.62); --gold:#ff8fab; --gold-2:#e5688b; --gold-ink:#ffffff;
+  --bad:#f26d6d; --good:#5cbf85;
+  --paper:#fffdf8; --paper-2:#ffe9ee; --ink:#4a2b3a; --ink-soft:#8a6478;
+  --shadow:0 8px 22px rgba(220,120,160,.18);
+  --display:"Fraunces", Georgia, "Times New Roman", serif;
+  --body:"Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.4;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.4;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;
+  background-image:radial-gradient(circle at 20% 0%,#ffe1ea,transparent 45%),radial-gradient(circle at 90% 100%,#fff0d9,transparent 40%);background-attachment:fixed}
 button{font:inherit;color:inherit;cursor:pointer}
-button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+button:focus-visible,input:focus-visible{outline:2px solid var(--gold-2);outline-offset:2px}
 #app{height:100%;max-width:560px;margin:0 auto}
 .muted{color:var(--muted)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--raised);border-radius:12px;padding:12px 16px;font-weight:600;min-height:46px}
-.btn.gold{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
-.btn.ghost{background:transparent}
-.btn.bad{background:transparent;border-color:var(--bad);color:var(--bad)}
-.btn:disabled{opacity:.4;cursor:default}
+h1,h2,h3{font-family:var(--display);font-weight:800;text-wrap:balance;font-variation-settings:"SOFT" 50}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:12px 18px;font-weight:800;min-height:46px;transition:transform .08s}
+.btn:active{transform:scale(.97)}
+.btn.gold{background:var(--gold);color:#fff;border-color:var(--gold);box-shadow:0 4px 12px rgba(255,143,171,.45)}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--ink-soft)}
+.btn.bad{background:#fff;border-color:var(--bad);color:var(--bad)}
+.btn:disabled{opacity:.4;cursor:default;box-shadow:none}
 .btn.wide{width:100%}
-input{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-height:46px;width:100%}
-.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0}
+input{font:inherit;color:var(--fg);background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-height:46px;width:100%;font-size:17px}
+input:focus{border-color:var(--gold)}
+input::placeholder{color:rgba(74,43,58,.35)}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0;font-weight:800}
 
 /* Home + lobby */
-.home,.lobby,.center{display:flex;flex-direction:column;gap:14px;padding-block:28px;padding-inline:16px}
-.logo{font-family:var(--display);font-weight:400;font-size:64px;line-height:.9;margin:0;color:var(--gold);letter-spacing:.01em}
-.tag{margin:6px 0 10px;color:var(--muted)}
-.home label{font-size:13px;color:var(--muted);margin-bottom:-8px}
+.home,.lobby,.center{display:flex;flex-direction:column;gap:14px;padding-block:28px;padding-inline:20px;min-height:100%;justify-content:center}
+.logo{font-family:var(--display);font-weight:800;font-size:58px;line-height:.95;margin:0;color:var(--ink);letter-spacing:-.02em;text-align:center}
+.logo em{font-style:italic;color:var(--gold-2);font-weight:600}
+.tag{margin:8px 0 10px;color:var(--muted);text-align:center}
+.home label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:-8px}
 .row{display:flex;gap:8px}
-.row input{flex:1;min-width:0;text-transform:uppercase;letter-spacing:.2em;font-weight:700}
-.or{text-align:center;color:var(--muted);font-size:13px;margin-top:6px}
-.warn{color:var(--bad);font-size:14px;margin:0}
-.code{font-family:var(--display);font-size:72px;letter-spacing:.12em;color:var(--gold);line-height:1}
+.row input{flex:1;min-width:0;text-transform:uppercase;letter-spacing:.3em;font-weight:800;font-family:var(--display);text-align:center;font-size:22px}
+.or{text-align:center;color:var(--muted);font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin-top:6px}
+.warn{color:var(--bad);font-size:14px;margin:0;font-weight:700}
+.codebox{background:#fff;border:2px dashed var(--gold);border-radius:22px;padding:16px 18px 14px;text-align:center;box-shadow:var(--shadow)}
+.code{font-family:var(--display);font-size:56px;letter-spacing:.25em;padding-left:.25em;color:var(--gold-2);line-height:1;font-weight:900}
 .seats{list-style:none;margin:6px 0;padding:0;display:flex;flex-direction:column;gap:8px}
-.seats li{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-weight:600}
-.seats li.empty{background:transparent;border-style:dashed;color:var(--muted);font-weight:400}
-.seats em{font-style:normal;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:700}
-.seat{font-family:var(--display);color:var(--muted);width:18px}
+.seats li{display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;font-weight:700;box-shadow:0 2px 6px rgba(220,120,160,.1)}
+.seats li.empty{background:transparent;border-style:dashed;color:var(--muted);font-weight:400;box-shadow:none}
+.seats em{font-style:normal;font-size:10px;letter-spacing:.1em;text-transform:uppercase;background:var(--gold);color:#fff;font-weight:900;padding:2px 7px;border-radius:999px}
+.seat{font-family:var(--display);color:var(--gold-2);width:18px;font-weight:900}
 
 /* Game frame */
 .game{height:100%;display:flex;flex-direction:column}
-.top{display:flex;align-items:center;gap:10px;padding-block:10px;padding-inline:16px;border-bottom:1px solid var(--line)}
-.top .meta{display:flex;flex-direction:column;font-size:12px;color:var(--muted);line-height:1.2}
-.top .meta b{font-family:var(--display);font-weight:400;color:var(--fg);font-size:15px;letter-spacing:.1em}
-.turn{flex:1;text-align:center;font-weight:700;font-size:14px;padding:7px 10px;border-radius:999px;background:var(--surface)}
-.turn.me{background:var(--gold);color:var(--gold-ink)}
+.top{display:flex;align-items:center;gap:10px;padding-block:10px;padding-inline:14px;border-bottom:1px solid var(--line);background:rgba(255,244,246,.94);backdrop-filter:blur(8px)}
+.top .meta{display:flex;flex-direction:column;font-size:11px;color:var(--muted);line-height:1.2;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.top .meta b{font-family:var(--display);font-weight:900;color:var(--gold-2);font-size:16px;letter-spacing:.14em;text-transform:none}
+.turn{flex:1;text-align:center;font-weight:800;font-size:14px;padding:7px 12px;border-radius:999px;background:#fff;border:1.5px solid var(--line)}
+.turn.me{background:var(--gold);color:#fff;border-color:var(--gold)}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--bad);flex:none}
 .dot.on{background:var(--good)}
-.icon{border:1px solid var(--line);background:var(--surface);border-radius:10px;width:40px;height:36px;font-weight:700}
-.scroll{flex:1;overflow-y:auto;padding-block:12px;padding-inline:16px;display:flex;flex-direction:column;gap:14px}
+.icon{border:1.5px solid var(--line);background:#fff;border-radius:999px;width:40px;height:36px;font-weight:900;color:var(--ink-soft)}
+.scroll{flex:1;overflow-y:auto;padding-block:12px;padding-inline:14px;display:flex;flex-direction:column;gap:14px}
 
 .opps{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
-.opp{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
-.opp.turn-on{border-color:var(--gold)}
-.opp.open{background:var(--raised)}
-.opp .on{font-weight:700;display:flex;justify-content:space-between;gap:6px}
+.opp{text-align:left;background:rgba(255,255,255,.7);border:1.5px solid var(--line);border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-width:0;box-shadow:0 2px 6px rgba(220,120,160,.08)}
+.opp.turn-on{border-color:var(--gold);box-shadow:0 0 0 2px var(--soft) inset}
+.opp.open{background:#fff}
+.opp .on{font-weight:800;display:flex;justify-content:space-between;gap:6px;font-family:var(--display);font-size:15px}
 .opp .on span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.opp .on i{font-style:normal;font-size:11px;color:var(--gold);letter-spacing:.08em;text-transform:uppercase}
+.opp .on i{font-style:normal;font-size:9px;background:var(--gold);color:#fff;font-weight:900;padding:2px 7px;border-radius:999px;letter-spacing:.08em;text-transform:uppercase;align-self:center;font-family:var(--body)}
 .opp .os{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .pips{display:flex;flex-wrap:wrap;gap:4px}
-.pip{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-variant-numeric:tabular-nums;color:var(--muted)}
-.pip::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--c)}
-.pip.full{color:var(--fg);font-weight:700}
-.pip.full::before{box-shadow:0 0 0 2px var(--fg)}
-.sets3{font-size:12px;font-weight:700}
-.sets3 b{color:var(--gold)}
+.pip{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700}
+.pip::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--c)}
+.pip.none::before{display:none}
+.pip.full{color:var(--fg);font-weight:900}
+.pip.full::before{box-shadow:0 0 0 2px var(--gold)}
+.sets3{font-size:12px;font-weight:800}
+.sets3 b{color:var(--gold-2)}
 
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.panel{background:#fff;border:1.5px solid var(--soft);border-radius:18px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow)}
 .sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.sec-h h2{margin:0;font-size:15px}
-.sec-h span{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sec-h h2{margin:0;font-size:17px}
+.sec-h span{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .sec-h span b{color:var(--fg)}
 .groups{display:flex;flex-wrap:wrap;gap:8px}
-.grp{border-radius:10px;background:var(--bg);border:1px solid var(--line);padding:6px;display:flex;flex-direction:column;gap:5px;min-width:96px}
-.grp.full{border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c)}
-.grp-h{display:flex;justify-content:space-between;gap:8px;font-size:11px;font-weight:700}
-.grp-h::before{content:"";width:12px;height:12px;border-radius:3px;background:var(--c);flex:none}
+.grp{border-radius:14px;background:var(--bg);border:1.5px solid var(--line);padding:7px;display:flex;flex-direction:column;gap:5px;min-width:100px}
+.grp.full{border-color:var(--gold);box-shadow:0 0 0 2px var(--soft) inset}
+.grp-h{display:flex;justify-content:space-between;gap:8px;font-size:11px;font-weight:800}
+.grp-h::before{content:"";width:12px;height:12px;border-radius:50%;background:var(--c);flex:none}
 .grp-h span:first-of-type{flex:1}
-.grp-r{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.grp-r{font-size:10.5px;color:var(--gold-2);font-variant-numeric:tabular-nums;font-weight:800}
 .grp-cards{display:flex;flex-wrap:wrap;gap:4px}
-.mini{border:0;border-radius:6px;background:var(--paper);color:var(--ink);font-size:11px;font-weight:600;padding:3px 6px;display:inline-flex;align-items:center;gap:4px;position:relative;overflow:hidden}
-.mini::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--c)}
-.mini{padding-left:9px}
+.mini{border:0;border-radius:999px;background:#fff;color:var(--ink);font-size:11px;font-weight:700;padding:3px 8px;display:inline-flex;align-items:center;gap:4px;position:relative;overflow:hidden;border:1px solid var(--line)}
+.mini::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c);flex:none}
 .mini.wildchip{cursor:pointer}
 .mini.tap{outline:2px dashed var(--gold);outline-offset:1px}
-.mini.bld{background:var(--gold);color:var(--gold-ink)}
+.mini.bld{background:var(--gold);color:#fff;border-color:var(--gold)}
 .mini.bld::before{display:none}
 .bankrow{display:flex;flex-wrap:wrap;gap:4px}
-.coin{font-family:var(--display);font-size:12px;background:var(--raised);border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--gold)}
-.empty-note{font-size:13px;color:var(--muted);margin:0}
+.coin{font-weight:900;font-size:11px;background:#e6f6ea;border:1px solid #b9e2c6;border-radius:999px;padding:2px 8px;color:#2a6b45}
+.empty-note{font-size:13px;color:var(--muted);margin:0;font-style:italic}
 
 .log{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:3px;margin:0;padding:0;list-style:none}
-.log li:last-child{color:var(--fg)}
+.log li:last-child{color:var(--fg);font-weight:700}
 
 /* Dock */
-.dock{border-top:1px solid var(--line);background:var(--surface);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px}
-.dock-row{display:flex;align-items:center;gap:10px;padding-inline:16px}
+.dock{border-top:1px solid var(--line);background:rgba(255,255,255,.75);backdrop-filter:blur(8px);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px}
+.dock-row{display:flex;align-items:center;gap:10px;padding-inline:14px}
 .dock-row .status{flex:1;font-size:13px;color:var(--muted);min-width:0}
 .dock-row .status b{color:var(--fg)}
 .plays{display:flex;gap:4px}
-.plays i{width:10px;height:10px;border-radius:50%;border:2px solid var(--gold)}
-.plays i.used{background:transparent;border-color:var(--line)}
+.plays i{width:11px;height:11px;border-radius:50%;border:2px solid var(--gold)}
+.plays i.used{background:transparent;border-color:var(--soft)}
 .plays i:not(.used){background:var(--gold)}
-.hand{display:flex;gap:8px;overflow-x:auto;padding-inline:16px;padding-block:4px 2px;scroll-snap-type:x proximity}
+.hand{display:flex;gap:8px;overflow-x:auto;padding-inline:14px;padding-block:6px 2px;scroll-snap-type:x proximity}
 
 /* Cards */
-.card{flex:none;width:94px;height:132px;border-radius:10px;border:1px solid var(--paper-2);background:var(--paper);color:var(--ink);display:flex;flex-direction:column;align-items:stretch;text-align:left;padding:0;overflow:hidden;position:relative;scroll-snap-align:start;box-shadow:0 2px 0 rgba(0,0,0,.35)}
-.card .band{height:30px;flex:none}
-.card .cv{position:absolute;top:5px;right:5px;font-family:var(--display);font-size:11px;background:var(--paper);color:var(--ink);border-radius:999px;padding:1px 6px;border:1px solid var(--paper-2)}
-.card .ct{font-weight:700;font-size:13px;line-height:1.15;padding:7px 7px 2px}
-.card .cs{font-size:10.5px;color:var(--ink-soft);padding:0 7px;line-height:1.25}
-.card.money{background:var(--paper);align-items:center;justify-content:center;gap:4px}
-.card.money .mv{font-family:var(--display);font-size:30px;color:var(--ink)}
-.card.money .ml{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
-.card.money::after{content:"";position:absolute;inset:6px;border:1.5px solid var(--paper-2);border-radius:6px;pointer-events:none}
-.card.action .band{background:var(--ink)}
+.card{flex:none;width:96px;height:134px;border-radius:14px;border:1.5px solid var(--paper-2);background:var(--paper);color:var(--ink);display:flex;flex-direction:column;align-items:stretch;text-align:left;padding:0;overflow:hidden;position:relative;scroll-snap-align:start;box-shadow:0 4px 10px rgba(220,120,160,.16)}
+.card .band{height:34px;flex:none;border-radius:0 0 10px 10px}
+.card .cv{position:absolute;top:6px;right:6px;font-family:var(--display);font-weight:900;font-size:11px;background:#fff;color:var(--ink);border-radius:999px;padding:1px 6px;border:1px solid var(--paper-2)}
+.card .ct{font-family:var(--display);font-weight:800;font-size:13px;line-height:1.15;padding:7px 8px 2px}
+.card .cs{font-size:10.5px;color:var(--ink-soft);padding:0 8px;line-height:1.25}
+.card.money{background:#f1faf3;border-color:#cdeed7;align-items:center;justify-content:center;gap:4px}
+.card.money .mv{font-family:var(--display);font-weight:900;font-size:30px;color:#2a6b45}
+.card.money .ml{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#4f8f68;font-weight:800}
+.card.money::after{content:"";position:absolute;inset:6px;border:1.5px dashed #b9e2c6;border-radius:9px;pointer-events:none}
+.card.action .band{background:linear-gradient(135deg,#ffb3c6,#ffd6e1)}
 .card.action .ct{padding-top:7px}
 .card.sel{outline:3px solid var(--gold);outline-offset:-3px;transform:translateY(-4px)}
-.ladder{display:flex;gap:3px;padding:4px 7px 0;font-size:10px;font-variant-numeric:tabular-nums;color:var(--ink-soft)}
-.ladder span{border:1px solid var(--paper-2);border-radius:4px;padding:0 3px}
+.ladder{display:flex;gap:3px;padding:4px 8px 0;font-size:10px;font-variant-numeric:tabular-nums;color:var(--ink-soft);font-weight:700}
+.ladder span{border:1px solid var(--paper-2);border-radius:999px;padding:0 4px}
 
 /* Sheet */
-.scrim{position:fixed;inset:0;background:rgba(5,7,11,.6);display:flex;align-items:flex-end;justify-content:center;z-index:10}
-.sheet{width:100%;max-width:560px;max-height:86%;overflow-y:auto;background:var(--surface);border-top:1px solid var(--line);border-radius:18px 18px 0 0;padding-block:16px calc(18px + env(safe-area-inset-bottom,0px));padding-inline:16px;display:flex;flex-direction:column;gap:14px}
-.sheet h3{margin:0;font-size:18px;text-wrap:balance}
+.scrim{position:fixed;inset:0;background:rgba(74,43,58,.35);display:flex;align-items:flex-end;justify-content:center;z-index:10}
+.sheet{width:100%;max-width:560px;max-height:86%;overflow-y:auto;background:var(--bg);border-top:1.5px solid var(--soft);border-radius:22px 22px 0 0;padding-block:18px calc(18px + env(safe-area-inset-bottom,0px));padding-inline:18px;display:flex;flex-direction:column;gap:14px;box-shadow:0 -8px 30px rgba(220,120,160,.2)}
+.sheet h3{margin:0;font-size:19px}
 .sheet p{margin:0}
 .sheet .lead{display:flex;gap:14px;align-items:flex-start}
 .sheet .lead .card{transform:none}
@@ -149,17 +157,17 @@ input{font:inherit;color:var(--fg);background:var(--surface);border:1px solid va
 .btns{display:flex;flex-wrap:wrap;gap:8px}
 .btns .btn{flex:1 1 140px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:8px 12px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
-.chip[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--gold-ink)}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#fff}
 .chip:disabled{opacity:.35;cursor:default}
-.chip .sw{width:12px;height:12px;border-radius:3px;background:var(--c)}
-.step-l{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
-.total{font-variant-numeric:tabular-nums;font-weight:700}
-.total.ok{color:var(--good)}
-.big-win{font-family:var(--display);font-size:44px;line-height:1;color:var(--gold);margin:0}
+.chip .sw{width:12px;height:12px;border-radius:50%;background:var(--c);border:1px solid rgba(0,0,0,.08)}
+.step-l{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.total{font-variant-numeric:tabular-nums;font-weight:800}
+.total.ok{color:#2a6b45}
+.big-win{font-family:var(--display);font-weight:900;font-size:44px;line-height:1;color:var(--gold-2);margin:0}
 .waiting{font-size:13px;color:var(--muted)}
 
-#toast{position:fixed;left:50%;bottom:calc(200px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 14px;border-radius:12px;font-size:14px;font-weight:600;z-index:30;max-width:calc(100% - 32px);text-align:center}
+#toast{position:fixed;left:50%;bottom:calc(200px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;font-weight:700;z-index:30;max-width:calc(100% - 32px);text-align:center;box-shadow:var(--shadow)}
 @media (prefers-reduced-motion:no-preference){.card{transition:transform .15s}}
 </style>
 </head>
@@ -172,16 +180,29 @@ input{font:inherit;color:var(--fg);background:var(--surface);border:1px solid va
 <script>
 /* ---------- Cards ---------- */
 const COL={
-  brown:{n:'Brown',size:2,rent:[1,2],hex:'#8b5a3c',val:1},
-  lightblue:{n:'Light Blue',size:3,rent:[1,2,3],hex:'#8fd0ee',val:1},
-  pink:{n:'Pink',size:3,rent:[1,2,4],hex:'#d8579b',val:2},
-  orange:{n:'Orange',size:3,rent:[1,3,5],hex:'#ee8a2c',val:2},
-  red:{n:'Red',size:3,rent:[2,3,6],hex:'#d83b33',val:3},
-  yellow:{n:'Yellow',size:3,rent:[2,4,6],hex:'#f1cb2f',val:3},
-  green:{n:'Green',size:3,rent:[2,4,7],hex:'#2f9a54',val:4},
-  darkblue:{n:'Dark Blue',size:2,rent:[3,8],hex:'#2c4cab',val:4},
-  railroad:{n:'Railroad',size:4,rent:[1,2,3,4],hex:'#55595f',val:2},
-  utility:{n:'Utility',size:2,rent:[1,2],hex:'#a9d49a',val:2},
+  brown:{n:'Brown',size:2,rent:[1,2],hex:'#c49a7a',val:1},
+  lightblue:{n:'Light Blue',size:3,rent:[1,2,3],hex:'#9ad7f0',val:1},
+  pink:{n:'Pink',size:3,rent:[1,2,4],hex:'#f7a1c4',val:2},
+  orange:{n:'Orange',size:3,rent:[1,3,5],hex:'#ffb86b',val:2},
+  red:{n:'Red',size:3,rent:[2,3,6],hex:'#ff8a80',val:3},
+  yellow:{n:'Yellow',size:3,rent:[2,4,6],hex:'#ffe07a',val:3},
+  green:{n:'Green',size:3,rent:[2,4,7],hex:'#8fd9a8',val:4},
+  darkblue:{n:'Dark Blue',size:2,rent:[3,8],hex:'#8fa8ff',val:4},
+  railroad:{n:'Transit',size:4,rent:[1,2,3,4],hex:'#b8a8c8',val:2},
+  utility:{n:'Utility',size:2,rent:[1,2],hex:'#bfe6d0',val:2},
+};
+/* Philly edition: each property card is a neighborhood. Order matches the deck build, so card ids are unchanged. */
+const PROPS={
+  brown:['Passyunk Ave','South Street'],
+  lightblue:['Fishtown','Northern Liberties','Kensington'],
+  pink:['Fairmount','Spring Garden','Art Museum'],
+  orange:['Old City','Society Hill','Queen Village'],
+  red:['Wash Square West','Midtown Village','Chinatown'],
+  yellow:['Rittenhouse','Fitler Square','Graduate Hospital'],
+  green:['Manayunk','Chestnut Hill','East Falls'],
+  darkblue:['Broad Street','Walnut Street'],
+  railroad:['Broad Street Line','Market–Frankford Line','Regional Rail','PATCO'],
+  utility:['Electric Works','Water Works'],
 };
 const ORDER=['brown','lightblue','pink','orange','red','yellow','green','darkblue','railroad','utility'];
 const ACT={
@@ -192,14 +213,14 @@ const ACT={
   debt:{n:'Debt Collector',v:3,k:3,d:'One player pays you $5M.'},
   birthday:{n:"It's My Birthday",v:2,k:3,d:'Every other player pays you $2M.'},
   passgo:{n:'Pass Go',v:1,k:10,d:'Draw 2 extra cards.'},
-  house:{n:'House',v:3,k:3,d:'Add to a full set (not Railroad or Utility). +$3M rent.'},
+  house:{n:'House',v:3,k:3,d:'Add to a full set (not Transit or Utility). +$3M rent.'},
   hotel:{n:'Hotel',v:4,k:2,d:'Add to a full set that has a house. +$4M rent.'},
   double:{n:'Double the Rent',v:1,k:2,d:'Play with a rent card to double it. Uses one of your plays.'},
 };
 function buildDeck(){
   const d=[];const add=(n,o)=>{for(let i=0;i<n;i++)d.push(Object.assign({},o,{id:d.length}));};
   [[1,6],[2,5],[3,3],[4,3],[5,2],[10,1]].forEach(([v,n])=>add(n,{t:'money',v}));
-  ORDER.forEach(c=>add(COL[c].size,{t:'prop',v:COL[c].val,colors:[c]}));
+  ORDER.forEach(c=>PROPS[c].forEach(name=>add(1,{t:'prop',v:COL[c].val,colors:[c],name})));
   add(1,{t:'wild',v:4,colors:['darkblue','green']});
   add(1,{t:'wild',v:4,colors:['green','railroad']});
   add(1,{t:'wild',v:2,colors:['utility','railroad']});
@@ -247,7 +268,7 @@ function draw(st,p,n){
 function takeFromHand(st,p,id){const h=st.hands[p];const i=h.indexOf(id);if(i<0)return false;h.splice(i,1);return true}
 function cardName(id){const c=D[id];
   if(c.t==='money') return `$${c.v}M`;
-  if(c.t==='prop') return COL[c.colors[0]].n;
+  if(c.t==='prop') return c.name;
   if(c.t==='wild') return c.multi?'Wild (any color)':`Wild ${c.colors.map(x=>COL[x].n).join('/')}`;
   if(c.t==='rent') return c.wild?'Wild Rent':`Rent ${c.colors.map(x=>COL[x].n).join('/')}`;
   return ACT[c.a].n;
@@ -303,7 +324,7 @@ function play(st,o){
     if(!(c.t==='prop'||c.t==='wild')) return 'That card isn’t a property.';
     if(!c.colors.includes(o.col)) return 'Pick a color for this card.';
     takeFromHand(st,ME,c.id); st.props[ME].push({c:c.id,col:o.col}); st.plays++;
-    log(st,`${me} laid down ${COL[o.col].n}${c.t==='wild'?' (wild)':''}.`); return finish(st);
+    log(st,`${me} laid down ${c.t==='wild'?'a wild as '+COL[o.col].n:c.name}.`); return finish(st);
   }
   const tgtOk=id=>opp.includes(id);
   const spend=()=>{takeFromHand(st,ME,c.id);st.discard.push(c.id);st.plays++;};
@@ -343,7 +364,7 @@ function play(st,o){
     case 'house': case 'hotel': {
       const col=o.col;
       if(!col||!complete(st,ME,col)) return 'Pick one of your full sets.';
-      if(col==='railroad'||col==='utility') return "Railroads and Utilities can't hold buildings.";
+      if(col==='railroad'||col==='utility') return "Transit and Utilities can't hold buildings.";
       const b=builds(st,ME,col), hasH=b.some(id=>D[id].a==='house'), hasT=b.some(id=>D[id].a==='hotel');
       if(c.a==='house'&&hasH) return 'That set already has a house.';
       if(c.a==='hotel'&&(!hasH||hasT)) return 'A hotel needs a house first, and only one per set.';
@@ -375,7 +396,7 @@ function resolve(st,P,t,pay){
   if(P.kind==='sly'){
     const i=st.props[T].findIndex(x=>x.c===P.take);
     if(i<0||complete(st,T,st.props[T][i].col)){log(st,'The Sly Deal missed. That card moved.');return null}
-    const [e]=st.props[T].splice(i,1); st.props[A].push(e); log(st,`${nm(st,A)} took ${nm(st,T)}'s ${COL[e.col].n}.`); return null;
+    const [e]=st.props[T].splice(i,1); st.props[A].push(e); log(st,`${nm(st,A)} took ${nm(st,T)}'s ${cardName(e.c)}.`); return null;
   }
   if(P.kind==='forced'){
     const i=st.props[T].findIndex(x=>x.c===P.take), j=st.props[A].findIndex(x=>x.c===P.give);
@@ -556,7 +577,7 @@ function cardHTML(id,opts={}){
   const c=D[id], sel=opts.sel?' sel':'', act=opts.act||'card';
   if(c.t==='money') return `<button class="card money${sel}" data-act="${act}" data-id="${id}" aria-label="$${c.v}M money"><span class="mv">$${c.v}M</span><span class="ml">Money</span></button>`;
   let t='',s='',extra='';
-  if(c.t==='prop'){t=COL[c.colors[0]].n;s=`Full set: ${COL[c.colors[0]].size}`;extra=`<span class="ladder">${COL[c.colors[0]].rent.map(r=>`<span>${r}</span>`).join('')}</span>`;}
+  if(c.t==='prop'){t=c.name;s=`${COL[c.colors[0]].n} · set of ${COL[c.colors[0]].size}`;extra=`<span class="ladder">${COL[c.colors[0]].rent.map(r=>`<span>${r}</span>`).join('')}</span>`;}
   else if(c.t==='wild'){t='Wild';s=c.multi?'Any color. No cash value.':c.colors.map(x=>COL[x].n).join(' / ');}
   else if(c.t==='rent'){t=c.wild?'Wild Rent':'Rent';s=c.wild?'One player pays, any color':c.colors.map(x=>COL[x].n).join(' / ')+'. Everyone pays.';}
   else {t=ACT[c.a].n;s=ACT[c.a].d.split('. ')[0].replace(/\.$/,'');}
@@ -570,7 +591,7 @@ function groupsHTML(st,p,mine){
     const n=countCol(st,p,c), full=n>=COL[c].size, r=rentFor(st,p,c);
     const cards=props(st,p).filter(e=>e.col===c).map(e=>{
       const w=D[e.c].t==='wild';
-      const lbl=w?(D[e.c].multi?'Wild ★':'Wild'):COL[c].n.split(' ')[0];
+      const lbl=w?(D[e.c].multi?'Wild ★':'Wild'):D[e.c].name;
       return myMove&&w?`<button class="mini wildchip tap" style="--c:${COL[c].hex}" data-act="rewild" data-id="${e.c}" aria-label="Move wild card">${lbl}</button>`:`<span class="mini" style="--c:${COL[c].hex}">${lbl}</span>`;
     }).join('')+builds(st,p,c).map(id=>`<span class="mini bld">${ACT[D[id].a].n}</span>`).join('');
     return `<div class="grp${full?' full':''}" style="--c:${COL[c].hex}"><div class="grp-h"><span>${COL[c].n}</span><span>${n}/${COL[c].size}</span></div><div class="grp-cards">${cards}</div><div class="grp-r">Rent $${r}M</div></div>`;
@@ -582,13 +603,13 @@ function bankHTML(st,p){
 }
 function homeView(){
   return `<div class="home">
-    <div><h1 class="logo">Deal<br>Night</h1><p class="tag">The property card game. 2 to 5 players, one phone each.</p></div>
+    <div><h1 class="logo">Deal <em>Night</em></h1><p class="tag">Philly edition ♥ 2 to 5 phones, one table</p></div>
     ${!connected?'<p class="muted">Connecting to the relay…</p>':''}
     <label for="nm">Your name</label>
-    <input id="nm" maxlength="16" autocomplete="nickname" value="${esc(LS.get('dn-name')||'')}" placeholder="Name at the table">
-    <button class="btn gold wide" data-act="create" ${connected?'':'disabled'}>Create a room</button>
-    <div class="or">or join a friend's room</div>
-    <div class="row"><input id="code" maxlength="4" placeholder="CODE" autocapitalize="characters" autocomplete="off"><button class="btn" data-act="join" ${connected?'':'disabled'}>Join</button></div>
+    <input id="nm" maxlength="16" autocomplete="nickname" value="${esc(LS.get('dn-name')||'')}" placeholder="e.g. Neeraj">
+    <button class="btn gold wide" data-act="create" ${connected?'':'disabled'}>Start a new table</button>
+    <div class="or">or join one</div>
+    <div class="row"><input id="code" maxlength="4" placeholder="CODE" autocapitalize="characters" autocomplete="off"><button class="btn" data-act="join" ${connected?'':'disabled'}>Join table</button></div>
   </div>`;
 }
 function lobbyView(){
@@ -596,22 +617,21 @@ function lobbyView(){
   const seats=S.players.map((p,i)=>`<li><span class="seat">${i+1}</span><span>${esc(p.name)}</span>${p.id===S.hostId?'<em>host</em>':''}${p.id===ME?'<em>you</em>':''}</li>`).join('')
     +Array.from({length:Math.max(0,5-n)},(_, i)=>`<li class="empty"><span class="seat">${n+i+1}</span>Open seat</li>`).join('');
   return `<div class="lobby">
-    <p class="eyebrow">Room code</p><div class="code">${esc(S.code)}</div>
-    <p class="muted">Everyone opens Deal Night and enters this code. The game deals in whoever is here when the host starts.</p>
+    <div class="codebox"><p class="eyebrow">Table code</p><div class="code">${esc(S.code)}</div><p class="muted" style="margin:6px 0 0;font-size:13px">Everyone opens Deal Night and types this in. Whoever's here when ${host?'you':esc(nm(S,S.hostId))} deals is in.</p></div>
     <ul class="seats">${seats}</ul>
-    ${!inRoom?`<button class="btn gold wide" data-act="joinhere" ${busy?'disabled':''}>Take a seat</button>`:host?`<button class="btn gold wide" data-act="start" ${n<2?'disabled':''}>${n<2?'Waiting for players':`Start with ${n} players`}</button>`:`<p class="muted">Waiting for ${esc(nm(S,S.hostId))} to start.</p>`}
-    <button class="btn ghost wide" data-act="leave">Leave room</button>
+    ${!inRoom?`<button class="btn gold wide" data-act="joinhere" ${busy?'disabled':''}>Take a seat</button>`:host?`<button class="btn gold wide" data-act="start" ${n<2?'disabled':''}>${n<2?'Waiting for players':`Deal for ${n} ♥`}</button>`:`<p class="muted">Waiting for ${esc(nm(S,S.hostId))} to start.</p>`}
+    <button class="btn ghost wide" data-act="leave">Leave table</button>
   </div>`;
 }
 function gameView(){
   const st=S, myTurn=cur(st)===ME, P=st.pending;
-  const turnTxt=st.status==='over'?`${esc(nm(st,st.winner))} won`:myTurn?(st.drawn?'Your turn':'Your turn. Draw'):`${esc(nm(st,cur(st)))}'s turn`;
+  const turnTxt=st.status==='over'?(st.winner===ME?'You won ♥':`${esc(nm(st,st.winner))} won ♥`):myTurn?(st.drawn?'Your turn':'Your turn. Draw'):`${esc(nm(st,cur(st)))}'s turn`;
   const opps=others(st,ME).map(id=>{
     const pip=ORDER.filter(c=>countCol(st,id,c)>0).map(c=>`<span class="pip${complete(st,id,c)?' full':''}" style="--c:${COL[c].hex}">${countCol(st,id,c)}/${COL[c].size}</span>`).join('');
     return `<button class="opp${cur(st)===id?' turn-on':''}${ui.open===id?' open':''}" data-act="opp" data-id="${id}" aria-expanded="${ui.open===id}">
       <span class="on"><span>${esc(nm(st,id))}</span>${cur(st)===id?'<i>Turn</i>':''}</span>
       <span class="os">${st.hands[id].length} cards · $${bankTotal(st,id)}M banked</span>
-      <span class="pips">${pip||'<span class="pip">No properties</span>'}</span>
+      <span class="pips">${pip||'<span class="pip none">No properties yet</span>'}</span>
       <span class="sets3"><b>${completeCols(st,id).length}</b>/3 sets</span>
     </button>`;}).join('');
   const openPanel=ui.open&&st.hands[ui.open]?`<section class="panel"><div class="sec-h"><h2>${esc(nm(st,ui.open))}'s table</h2><span>Bank <b>$${bankTotal(st,ui.open)}M</b></span></div>${groupsHTML(st,ui.open,false)}${bankHTML(st,ui.open)}</section>`:'';
@@ -626,7 +646,7 @@ function gameView(){
   let btn='';
   if(st.status==='playing'&&myTurn&&!P){ btn=st.drawn?`<button class="btn" data-act="end" ${busy?'disabled':''}>End turn</button>`:`<button class="btn gold" data-act="draw" ${busy?'disabled':''}>Draw ${st.hands[ME].length?2:5}</button>`; }
   return `<div class="game">
-    <header class="top"><span class="dot${connected?' on':''}" title="${connected?'Connected':'Reconnecting'}"></span><span class="meta">Room<b>${esc(st.code)}</b></span><span class="turn${myTurn&&st.status==='playing'?' me':''}">${turnTxt}</span><button class="icon" data-act="menu" aria-label="Menu">•••</button></header>
+    <header class="top"><span class="dot${connected?' on':''}" title="${connected?'Connected':'Reconnecting'}"></span><span class="meta">Table<b>${esc(st.code)}</b></span><span class="turn${myTurn&&st.status==='playing'?' me':''}">${turnTxt}</span><button class="icon" data-act="menu" aria-label="Menu">•••</button></header>
     <main class="scroll" id="scroller">
       <section class="opps">${opps}</section>
       ${openPanel}
@@ -645,7 +665,7 @@ function sheetWrap(inner,closable=true){return `<div class="scrim" ${closable?'d
 function pendText(st,P){
   const A=nm(st,P.actor);
   if(P.kind==='pay'){ if(P.why==='rent') return `${A} is charging $${P.amount}M rent on ${COL[P.col].n}.`; if(P.why==='debt') return `${A} sent the Debt Collector. Pay $5M.`; return `It's ${A}'s birthday. Pay $2M.`; }
-  if(P.kind==='sly') return `${A} played Sly Deal to take your ${COL[P.takeCol].n}${D[P.take].t==='wild'?' (wild)':''}.`;
+  if(P.kind==='sly') return `${A} played Sly Deal to take your ${D[P.take].t==='wild'?COL[P.takeCol].n+' wild':D[P.take].name}.`;
   if(P.kind==='forced') return `${A} played Forced Deal: their ${COL[P.giveCol].n} for your ${COL[P.takeCol].n}.`;
   return `${A} played Deal Breaker on your full ${COL[P.col].n} set.`;
 }
@@ -653,10 +673,10 @@ function sheetHTML(){
   const st=S, P=st.pending, hasJ=p=>st.hands[p].some(id=>D[id].a==='jsn');
   if(st.status==='over'){
     const host=st.hostId===ME;
-    return sheetWrap(`<p class="eyebrow">Game over</p><p class="big-win">${esc(nm(st,st.winner))} wins</p>
+    return sheetWrap(`<p class="eyebrow">Game over</p><p class="big-win">${st.winner===ME?'You win! ♥':esc(nm(st,st.winner))+' wins ♥'}</p>
       <p class="muted">Sets: ${completeCols(st,st.winner).map(c=>COL[c].n).join(', ')}</p>
       ${host?`<div class="btns"><button class="btn gold" data-act="again">Deal again</button><button class="btn" data-act="tolobby">Back to lobby</button></div>`:`<p class="muted">Waiting for ${esc(nm(st,st.hostId))} to deal again.</p>`}
-      <button class="btn ghost" data-act="leave">Leave room</button>`,false);
+      <button class="btn ghost" data-act="leave">Leave table</button>`,false);
   }
   if(P){
     const first=P.targets.find(t=>!t.done);
@@ -670,7 +690,7 @@ function sheetHTML(){
         const ok=tot>=P.amount||(ui.sel.length===all.length);
         const ch=all.map(id=>{
           const e=props(st,ME).find(x=>x.c===id); const c=D[id];
-          const label=e?`${COL[e.col].n}${c.t==='wild'?' wild':''} · $${c.v}M`:c.t==='action'&&(c.a==='house'||c.a==='hotel')&&!st.bank[ME].includes(id)?`${ACT[c.a].n} · $${c.v}M`:`$${c.v}M`;
+          const label=e?`${c.t==='wild'?COL[e.col].n+' wild':c.name} · $${c.v}M`:c.t==='action'&&(c.a==='house'||c.a==='hotel')&&!st.bank[ME].includes(id)?`${ACT[c.a].n} · $${c.v}M`:`$${c.v}M`;
           return chip('sel','id',id,label,ui.sel.includes(id),{c:e?COL[e.col].hex:null});
         }).join('');
         return sheetWrap(`<h3>${esc(pendText(st,P))}</h3>
@@ -690,9 +710,9 @@ function sheetHTML(){
   }
   const sh=ui.sheet; if(!sh) return '';
   if(sh.k==='menu'){
-    return sheetWrap(`<h3>Room ${esc(st.code)}</h3><p class="muted">${st.players.map(p=>esc(p.name)).join(', ')}</p>
+    return sheetWrap(`<h3>Table ${esc(st.code)}</h3><p class="muted">${st.players.map(p=>esc(p.name)).join(', ')}</p>
       <p class="muted">Moves sync between phones. If you leave the page, it catches up when you come back.</p>
-      <div class="btns">${cur(st)!==ME&&st.status==='playing'?`<button class="btn" data-act="skip">Skip ${esc(nm(st,cur(st)))}'s turn</button>`:''}${st.hostId===ME?`<button class="btn" data-act="tolobby">End game, back to lobby</button>`:''}<button class="btn bad" data-act="leave">Leave room</button></div>
+      <div class="btns">${cur(st)!==ME&&st.status==='playing'?`<button class="btn" data-act="skip">Skip ${esc(nm(st,cur(st)))}'s turn</button>`:''}${st.hostId===ME?`<button class="btn" data-act="tolobby">End game, back to lobby</button>`:''}<button class="btn bad" data-act="leave">Leave table</button></div>
       <button class="btn ghost" data-act="close">Close</button>`);
   }
   if(sh.k==='discard'){
@@ -710,7 +730,7 @@ function sheetHTML(){
   if(sh.k==='card'){
     if(!st.hands[ME].includes(sh.cid)){ui.sheet=null;return ''}
     const c=D[sh.cid], why=myTurnCheck(st)||(st.plays>=3?'No plays left. End your turn.':null);
-    const desc=c.t==='money'?'Money. Bank it to pay debts.':c.t==='prop'?`Property. A full set takes ${COL[c.colors[0]].size}. Rent ${COL[c.colors[0]].rent.map(r=>'$'+r+'M').join(' / ')}.`:c.t==='wild'?(c.multi?'Wild property for any color. Cannot be banked and is worth nothing as payment.':`Wild property: ${c.colors.map(x=>COL[x].n).join(' or ')}. You can move it on your turn.`):c.t==='rent'?(c.wild?'Charge one player rent for any color you own.':`Charge every other player rent for ${c.colors.map(x=>COL[x].n).join(' or ')}.`):ACT[c.a].d;
+    const desc=c.t==='money'?'Money. Bank it to pay debts.':c.t==='prop'?`${COL[c.colors[0]].n} property. A full set takes ${COL[c.colors[0]].size}. Rent ${COL[c.colors[0]].rent.map(r=>'$'+r+'M').join(' / ')}.`:c.t==='wild'?(c.multi?'Wild property for any color. Cannot be banked and is worth nothing as payment.':`Wild property: ${c.colors.map(x=>COL[x].n).join(' or ')}. You can move it on your turn.`):c.t==='rent'?(c.wild?'Charge one player rent for any color you own.':`Charge every other player rent for ${c.colors.map(x=>COL[x].n).join(' or ')}.`):ACT[c.a].d;
     let body='';
     if(why){ body=`<p class="warn">${esc(why)}</p>`; }
     else if(c.t==='money'){ body=`<div class="btns"><button class="btn gold" data-act="bank">Bank $${c.v}M</button></div>`; }
@@ -736,11 +756,11 @@ function actionConfig(st,c,sh){
     html=tgtRow();
     if(sh.target){
       const theirs=props(st,sh.target).filter(e=>!complete(st,sh.target,e.col));
-      html+=`<p class="step-l">Take</p>`+(theirs.length?`<div class="chips">${theirs.map(e=>chip('pick','take',e.c,`${COL[e.col].n}${D[e.c].t==='wild'?' wild':''}`,sh.take===e.c,{c:COL[e.col].hex})).join('')}</div>`:`<p class="muted">Nothing to take outside a full set.</p>`);
+      html+=`<p class="step-l">Take</p>`+(theirs.length?`<div class="chips">${theirs.map(e=>chip('pick','take',e.c,D[e.c].t==='wild'?`${COL[e.col].n} wild`:D[e.c].name,sh.take===e.c,{c:COL[e.col].hex})).join('')}</div>`:`<p class="muted">Nothing to take outside a full set.</p>`);
     }
     if(a==='forced'){
       const mine=props(st,ME).filter(e=>!complete(st,ME,e.col));
-      html+=`<p class="step-l">Give</p>`+(mine.length?`<div class="chips">${mine.map(e=>chip('pick','give',e.c,`${COL[e.col].n}${D[e.c].t==='wild'?' wild':''}`,sh.give===e.c,{c:COL[e.col].hex})).join('')}</div>`:`<p class="muted">You need a property outside a full set to give.</p>`);
+      html+=`<p class="step-l">Give</p>`+(mine.length?`<div class="chips">${mine.map(e=>chip('pick','give',e.c,D[e.c].t==='wild'?`${COL[e.col].n} wild`:D[e.c].name,sh.give===e.c,{c:COL[e.col].hex})).join('')}</div>`:`<p class="muted">You need a property outside a full set to give.</p>`);
       ready=sh.target&&sh.take!=null&&sh.give!=null;
     } else ready=sh.target&&sh.take!=null;
   }
@@ -751,7 +771,7 @@ function actionConfig(st,c,sh){
   }
   else if(a==='house'||a==='hotel'){
     const ok=completeCols(st,ME).filter(col=>{if(col==='railroad'||col==='utility')return false;const b=builds(st,ME,col);const h=b.some(id=>D[id].a==='house'),t=b.some(id=>D[id].a==='hotel');return a==='house'?!h:(h&&!t)});
-    html=`<p class="step-l">Build on</p>`+(ok.length?`<div class="chips">${ok.map(col=>chip('pick','col',col,COL[col].n,sh.col===col,{c:COL[col].hex})).join('')}</div>`:`<p class="muted">${a==='house'?'You need a full set (not Railroad or Utility) without a house.':'You need a full set with a house.'}</p>`);
+    html=`<p class="step-l">Build on</p>`+(ok.length?`<div class="chips">${ok.map(col=>chip('pick','col',col,COL[col].n,sh.col===col,{c:COL[col].hex})).join('')}</div>`:`<p class="muted">${a==='house'?'You need a full set (not Transit or Utility) without a house.':'You need a full set with a house.'}</p>`);
     ready=!!sh.col;
   }
   else if(a==='rent'){
@@ -769,7 +789,7 @@ function render(){
   const app=$('#app');
   const hand=$('#hand'), sc=$('#scroller'); const hx=hand?hand.scrollLeft:0, sy=sc?sc.scrollTop:0;
   if(!ROOM){ const nmv=$('#nm')?$('#nm').value:null, cv=$('#code')?$('#code').value:null; app.innerHTML=homeView(); if(nmv!=null)$('#nm').value=nmv; if(cv!=null)$('#code').value=cv; return; }
-  if(!S){ app.innerHTML=`<div class="center"><h1 class="logo">Deal<br>Night</h1><p class="muted">${ui.lost?`No game found for ${esc(ROOM)}. Check the code, or the host may have left.`:`Finding room ${esc(ROOM)}…`}</p><button class="btn ghost" data-act="leave">${ui.lost?'Back':'Cancel'}</button></div>`; return; }
+  if(!S){ app.innerHTML=`<div class="center"><h1 class="logo">Deal <em>Night</em></h1><p class="muted">${ui.lost?`No game found for ${esc(ROOM)}. Check the code, or the host may have left.`:`Finding room ${esc(ROOM)}…`}</p><button class="btn ghost" data-act="leave">${ui.lost?'Back':'Cancel'}</button></div>`; return; }
   const seated=S.players.some(p=>p.id===ME);
   if(S.status==='lobby') app.innerHTML=lobbyView();
   else if(!seated||!S.hands||!S.hands[ME]) app.innerHTML=`<div class="center"><p class="eyebrow">Room ${esc(S.code)}</p><h3>A game is in progress</h3><p class="muted">${S.players.map(p=>esc(p.name)).join(', ')} are playing. You can join the next round from the lobby.</p><button class="btn ghost" data-act="leave">Leave</button></div>`;
