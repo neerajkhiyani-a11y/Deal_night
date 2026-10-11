@@ -591,7 +591,7 @@ function groupsHTML(st,p,mine){
     const n=countCol(st,p,c), full=n>=COL[c].size, r=rentFor(st,p,c);
     const cards=props(st,p).filter(e=>e.col===c).map(e=>{
       const w=D[e.c].t==='wild';
-      const lbl=w?(D[e.c].multi?'Wild ★':'Wild'):D[e.c].name;
+      const lbl=w?COL[c].n:D[e.c].name;
       return myMove&&w?`<button class="mini wildchip tap" style="--c:${COL[c].hex}" data-act="rewild" data-id="${e.c}" aria-label="Move wild card">${lbl}</button>`:`<span class="mini" style="--c:${COL[c].hex}">${lbl}</span>`;
     }).join('')+builds(st,p,c).map(id=>`<span class="mini bld">${ACT[D[id].a].n}</span>`).join('');
     return `<div class="grp${full?' full':''}" style="--c:${COL[c].hex}"><div class="grp-h"><span>${COL[c].n}</span><span>${n}/${COL[c].size}</span></div><div class="grp-cards">${cards}</div><div class="grp-r">Rent $${r}M</div></div>`;
